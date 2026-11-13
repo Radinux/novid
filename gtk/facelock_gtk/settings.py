@@ -33,6 +33,11 @@ class SettingsDialog(Adw.PreferencesDialog):
         cam.add(self.rgb_row)
         page.add(cam)
 
+        # The service restarts when allow_rgb changes: show the camera it
+        # finds once it is back, not the empty state in between.
+        handler = daemon.connect("props-changed", lambda *_: self._show_camera())
+        self.connect("closed", lambda *_: daemon.disconnect(handler))
+
         self.refresh()
 
     def _set(self, row, active):
@@ -48,6 +53,9 @@ class SettingsDialog(Adw.PreferencesDialog):
             self.add_toast(Adw.Toast(title=error_text(err)))
             return
         self._set(self.rgb_row, bool(settings.get("allow-rgb")))
+        self._show_camera()
+
+    def _show_camera(self):
         name, kind = self.daemon.prop("CameraName"), self.daemon.prop("CameraKind")
         self.camera_row.set_title(GLib.markup_escape_text(name or _("No camera found")))
         self.camera_row.remove_css_class("warning")

@@ -38,6 +38,9 @@ class Daemon(GObject.Object):
         "enroll-captured": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "enroll-skipped": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "enroll-finished": (GObject.SignalFlags.RUN_FIRST, None, (bool, str, str)),
+        # Cached properties changed: CameraName/CameraKind, or all of them
+        # when the service restarts (cleared on exit, reloaded once back).
+        "props-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self):
@@ -55,6 +58,7 @@ class Daemon(GObject.Object):
                 callback(False, error_text(e))
                 return
             self.proxy.connect("g-signal", self._on_signal)
+            self.proxy.connect("g-properties-changed", lambda *_: self.emit("props-changed"))
             # Triggers D-Bus activation and checks the daemon is really there.
             self.proxy.call(
                 "org.freedesktop.DBus.Peer.Ping", None, Gio.DBusCallFlags.NONE, 15000, None,

@@ -216,6 +216,7 @@ class Window(Adw.ApplicationWindow):
             )
             self.stack.set_visible_child_name("unavailable")
             return
+        self.daemon.connect("props-changed", lambda *_: self._update_status())
         self.load()
 
     def load(self):
