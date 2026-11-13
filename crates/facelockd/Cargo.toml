@@ -1,0 +1,19 @@
+[package]
+name = "facelockd"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+env_logger = "0.11.11"
+facelock-core = { version = "0.1.0", path = "../facelock-core" }
+futures-util = "0.3.34"
+log = "0.4.35"
+nix = { version = "0.31.3", features = ["user"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time", "signal"] }
+toml_edit = "0.25.19"
+zbus = { version = "6.2.1", default-features = false, features = ["tokio", "proxy", "service"] }
+zeroize = "1.9.1"

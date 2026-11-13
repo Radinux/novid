@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="128" height="128" viewBox="0 0 128 128">
+  <!-- Face Unlock app icon. 128×128 grid, GNOME style: a raised white tile
+       (top face + bottom edge + drop shadow) carrying a blue face glyph.
+       The glyph paths are in the coordinates of the original drawing
+       (frame 42…722) and scaled into the tile by the group transform.
+       Groups are labelled for Inkscape (Layers and Objects panel). -->
+  <defs>
+    <!-- Tile -->
+    <linearGradient id="face-gradient" x1="0" y1="8" x2="0" y2="114" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef1f6"/>
+    </linearGradient>
+    <linearGradient id="edge-gradient" x1="8" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a9b2c0"/>
+      <stop offset="0.5" stop-color="#c6cdd8"/>
+      <stop offset="1" stop-color="#a9b2c0"/>
+    </linearGradient>
+    <linearGradient id="rim-gradient" x1="0" y1="96" x2="0" y2="114" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8d97a8" stop-opacity="0"/>
+      <stop offset="1" stop-color="#8d97a8" stop-opacity="0.35"/>
+    </linearGradient>
+    <!-- Glyph: blue, slightly lighter at the top -->
+    <linearGradient id="ink-gradient" x1="0" y1="40" x2="0" y2="722" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3584e4"/>
+      <stop offset="1" stop-color="#1a5fb4"/>
+    </linearGradient>
+    <filter id="tile-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+    <filter id="ink-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <g inkscape:groupmode="layer" inkscape:label="Tile">
+    <rect inkscape:label="drop shadow" x="10" y="16" width="108" height="106" rx="26"
+          fill="#1b2a44" opacity="0.32" filter="url(#tile-shadow)"/>
+    <rect inkscape:label="bottom edge" x="8" y="12" width="112" height="108" rx="24" fill="url(#edge-gradient)"/>
+    <rect inkscape:label="top face" x="8" y="8" width="112" height="106" rx="24" fill="url(#face-gradient)"/>
+    <rect inkscape:label="lower rim" x="8.5" y="8.5" width="111" height="105" rx="23.5"
+          fill="none" stroke="url(#rim-gradient)" stroke-width="1"/>
+  </g>
+
+  <!-- 680 drawing units → 80 icon units (frame 24…104, centred on the top face). -->
+  <g inkscape:label="Glyph" transform="translate(24 21) scale(0.11765) translate(-42 -42)"
+     fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="42">
+    <g inkscape:groupmode="layer" inkscape:label="Glyph shadow" stroke="#1a5fb4" opacity="0.28"
+       filter="url(#ink-shadow)" transform="translate(0 14)">
+      <path d="M42 240 C42 100 100 42 242 42 M520 42 C662 42 722 100 722 240 M42 520 C42 662 100 722 242 722 M722 520 C722 662 662 722 520 722 M242 202 V322 M562 202 V322 M402 320 V360 C402 412 392 440 362 440 M242 520 C300 572 380 596 482 562"/>
+    </g>
+    <g inkscape:groupmode="layer" inkscape:label="Glyph" stroke="url(#ink-gradient)">
+      <path inkscape:label="frame top left" d="M42 240 C42 100 100 42 242 42"/>
+      <path inkscape:label="frame top right" d="M520 42 C662 42 722 100 722 240"/>
+      <path inkscape:label="frame bottom left" d="M42 520 C42 662 100 722 242 722"/>
+      <path inkscape:label="frame bottom right" d="M722 520 C722 662 662 722 520 722"/>
+      <path inkscape:label="left eye" d="M242 202 V322"/>
+      <path inkscape:label="right eye" d="M562 202 V322"/>
+      <path inkscape:label="nose" d="M402 320 V360 C402 412 392 440 362 440"/>
+      <path inkscape:label="mouth" d="M242 520 C300 572 380 596 482 562"/>
+    </g>
+  </g>
+</svg>

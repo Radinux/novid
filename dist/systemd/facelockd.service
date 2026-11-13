@@ -1,0 +1,45 @@
+[Unit]
+Description=Facelock IR face authentication daemon
+Documentation=man:facelockd(8)
+
+[Service]
+Type=dbus
+BusName=org.facelock.Daemon1
+ExecStart=/usr/bin/facelockd
+StateDirectory=facelock
+StateDirectoryMode=0700
+UMask=0077
+
+# Only the camera, the system bus and our state directory.
+DevicePolicy=closed
+DeviceAllow=char-video4linux rw
+# Sealing the optional login keyring secret (systemd-creds, TPM2).
+DeviceAllow=/dev/tpmrm0 rw
+SupplementaryGroups=video
+CapabilityBoundingSet=
+AmbientCapabilities=
+NoNewPrivileges=yes
+ProtectSystem=strict
+# Settings page: toggling PAM services and allow_rgb (admin-authorized).
+ReadWritePaths=/etc/pam.d /etc/facelock
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+
+[Install]
+# D-Bus activated: no WantedBy needed.

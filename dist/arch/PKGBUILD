@@ -1,0 +1,63 @@
+# Local development PKGBUILD: builds the working tree two levels up.
+# The AUR version will fetch a tagged release and the models instead.
+pkgbase=facelock
+pkgname=('facelock' 'facelock-gtk')
+pkgver=0.1.0
+pkgrel=14
+arch=('x86_64')
+license=('GPL-3.0-or-later')
+makedepends=('cargo' 'gettext')
+options=('!lto' '!debug')
+
+_root="$(realpath "$startdir/../..")"
+
+build() {
+  export CARGO_TARGET_DIR="$srcdir/target"
+  cargo build --release --locked --manifest-path "$_root/Cargo.toml" \
+    -p facelockd -p facelock -p pam-facelock
+
+  mkdir -p "$srcdir/locale"
+  for po in "$_root"/gtk/po/*.po; do
+    lang="$(basename "$po" .po)"
+    mkdir -p "$srcdir/locale/$lang/LC_MESSAGES"
+    msgfmt -o "$srcdir/locale/$lang/LC_MESSAGES/facelock-gtk.mo" "$po"
+  done
+}
+
+package_facelock() {
+  pkgdesc="IR face authentication with liveness detection (daemon, PAM module, CLI)"
+  license=('GPL-3.0-or-later' 'MIT' 'Apache-2.0')
+  depends=('onnxruntime' 'dbus' 'pam' 'polkit' 'systemd')
+  optdepends=('facelock-gtk: graphical face management')
+  backup=('etc/facelock/config.toml')
+
+  local t="$srcdir/target/release"
+  install -Dm755 "$t/facelockd" "$pkgdir/usr/bin/facelockd"
+  install -Dm755 "$t/facelock" "$pkgdir/usr/bin/facelock"
+  install -Dm755 "$t/libpam_facelock.so" "$pkgdir/usr/lib/security/pam_facelock.so"
+
+  cd "$_root/dist"
+  install -Dm644 systemd/facelockd.service "$pkgdir/usr/lib/systemd/system/facelockd.service"
+  install -Dm644 dbus/org.facelock.Daemon1.service "$pkgdir/usr/share/dbus-1/system-services/org.facelock.Daemon1.service"
+  install -Dm644 dbus/org.facelock.Daemon1.conf "$pkgdir/usr/share/dbus-1/system.d/org.facelock.Daemon1.conf"
+  install -Dm644 polkit/org.facelock.policy "$pkgdir/usr/share/polkit-1/actions/org.facelock.policy"
+  install -Dm644 config.toml "$pkgdir/etc/facelock/config.toml"
+
+  install -Dm644 -t "$pkgdir/usr/share/facelock/models" \
+    "$_root/models/face_detection_yunet_2026may.onnx" \
+    "$_root/models/face_recognition_sface_2021dec.onnx"
+}
+
+package_facelock-gtk() {
+  pkgdesc="GTK4/libadwaita app to manage facelock face profiles"
+  arch=('any')
+  depends=('facelock' 'python-gobject' 'gtk4' 'libadwaita')
+
+  cd "$_root/gtk"
+  install -Dm755 facelock-gtk "$pkgdir/usr/bin/facelock-gtk"
+  install -Dm644 -t "$pkgdir/usr/share/facelock-gtk/facelock_gtk" facelock_gtk/*.py
+  install -Dm644 data/org.facelock.Facelock.desktop "$pkgdir/usr/share/applications/org.facelock.Facelock.desktop"
+  install -Dm644 data/icons/org.facelock.Facelock.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.facelock.Facelock.svg"
+  install -Dm644 data/icons/facelock-keyring-symbolic.svg "$pkgdir/usr/share/icons/hicolor/symbolic/apps/facelock-keyring-symbolic.svg"
+  cp -r "$srcdir/locale" "$pkgdir/usr/share/locale"
+}

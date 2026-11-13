@@ -1,0 +1,26 @@
+# Facelock configuration. Every key is optional; defaults are shown.
+
+[camera]
+# "auto" finds the IR camera (greyscale frames, strobing emitter). Or give a
+# path, preferably a stable one from /dev/v4l/by-path/.
+device = "auto"
+# Allow a regular colour webcam when there is no IR camera. Much weaker:
+# no IR liveness, a good photo may pass, the keyring is never unlocked.
+allow_rgb = false
+width = 640
+height = 360
+fps = 30
+
+[verify]
+# Cosine similarity a frame needs to count as a match.
+threshold = 0.5
+min_matches = 3
+timeout_ms = 4000
+# Refuse when the IR emitter does not strobe (lit/dark frame pairs).
+require_strobe = true
+min_emitter_gain = 30.0
+# Experimental: eye reflections must agree with the enrolled profile
+# (glasses or not). Not reliable yet, off by default.
+eyewear_check = false
+max_failures = 5
+cooldown_s = 30

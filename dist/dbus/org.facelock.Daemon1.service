@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=org.facelock.Daemon1
+Exec=/usr/bin/false
+User=root
+SystemdService=facelockd.service

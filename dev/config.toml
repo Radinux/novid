@@ -1,0 +1,9 @@
+# Configuration de développement (service sur le bus de session).
+[camera]
+device = "/dev/video2"
+
+[models]
+dir = "/home/radinux/Projets/facelock/models"
+
+[storage]
+dir = "/home/radinux/Projets/facelock/dev-state"

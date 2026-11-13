@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+import os
+import sys
+
+# Installed layout: /usr/share/facelock-gtk/facelock_gtk; dev: next to this script.
+for base in (os.path.dirname(os.path.realpath(__file__)), "/usr/share/facelock-gtk"):
+    if os.path.isdir(os.path.join(base, "facelock_gtk")):
+        sys.path.insert(0, base)
+        break
+
+from facelock_gtk.main import main  # noqa: E402
+
+sys.exit(main())

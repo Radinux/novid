@@ -1,0 +1,558 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the facelock-gtk package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: facelock-gtk 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-13 15:38+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: facelock_gtk/enroll.py:11 facelock_gtk/enroll.py:147
+#: facelock_gtk/tester.py:21
+msgid "Look straight at the screen"
+msgstr ""
+
+#: facelock_gtk/enroll.py:12
+msgid "Back to the center, facing the screen"
+msgstr ""
+
+#: facelock_gtk/enroll.py:13
+msgid "Slowly turn your head to the left"
+msgstr ""
+
+#: facelock_gtk/enroll.py:14
+msgid "A little more to the left"
+msgstr ""
+
+#: facelock_gtk/enroll.py:15
+msgid "Now turn to the right"
+msgstr ""
+
+#: facelock_gtk/enroll.py:16
+msgid "A little more to the right"
+msgstr ""
+
+#: facelock_gtk/enroll.py:17
+msgid "Back to the center, and lift your chin"
+msgstr ""
+
+#: facelock_gtk/enroll.py:18
+msgid "Now lower your head a little"
+msgstr ""
+
+#: facelock_gtk/enroll.py:24
+msgid "Face lost — look at the camera"
+msgstr ""
+
+#: facelock_gtk/enroll.py:25
+msgid "A bit more…"
+msgstr ""
+
+#: facelock_gtk/enroll.py:26
+msgid "Hold still…"
+msgstr ""
+
+#: facelock_gtk/enroll.py:27
+msgid "A bit too far, come back slightly"
+msgstr ""
+
+#: facelock_gtk/enroll.py:28
+msgid "Other direction"
+msgstr ""
+
+#: facelock_gtk/enroll.py:29
+msgid "Back to the center"
+msgstr ""
+
+#: facelock_gtk/enroll.py:30
+msgid "Keep your head level"
+msgstr ""
+
+#: facelock_gtk/enroll.py:30
+msgid "Keep your head centered"
+msgstr ""
+
+#: facelock_gtk/enroll.py:42 facelock_gtk/window.py:82
+#: facelock_gtk/window.py:165 facelock_gtk/window.py:194
+#: facelock_gtk/window.py:325 facelock_gtk/window.py:430
+msgid "Add a Face"
+msgstr ""
+
+#: facelock_gtk/enroll.py:53
+msgid "Waiting for authorization…"
+msgstr ""
+
+#: facelock_gtk/enroll.py:54
+msgid "Confirm with your password to add a face."
+msgstr ""
+
+#: facelock_gtk/enroll.py:73 facelock_gtk/tester.py:29
+#: facelock_gtk/window.py:179 facelock_gtk/window.py:195
+msgid "Test Recognition"
+msgstr ""
+
+#: facelock_gtk/enroll.py:75
+msgid "Done"
+msgstr ""
+
+#: facelock_gtk/enroll.py:80
+msgid "Face Added"
+msgstr ""
+
+#: facelock_gtk/enroll.py:85
+msgid "Try Again"
+msgstr ""
+
+#: facelock_gtk/enroll.py:108 facelock_gtk/settings.py:64
+#: facelock_gtk/window.py:330
+msgid "Authorization denied"
+msgstr ""
+
+#: facelock_gtk/enroll.py:108
+msgid "Adding a face requires your password."
+msgstr ""
+
+#: facelock_gtk/enroll.py:110
+msgid "Camera busy"
+msgstr ""
+
+#: facelock_gtk/enroll.py:110
+msgid "Another face operation is in progress."
+msgstr ""
+
+#: facelock_gtk/enroll.py:112
+msgid "Could not start"
+msgstr ""
+
+#: facelock_gtk/enroll.py:148
+msgid "Measuring your reference position"
+msgstr ""
+
+#: facelock_gtk/enroll.py:156
+#, python-brace-format
+msgid "Step {n} of {total}"
+msgstr ""
+
+#: facelock_gtk/enroll.py:190
+#, python-brace-format
+msgid "You can now unlock with “{label}”."
+msgstr ""
+
+#: facelock_gtk/enroll.py:196
+msgid ""
+"Not enough head positions were captured. Move slowly and pause at each "
+"position."
+msgstr ""
+
+#: facelock_gtk/enroll.py:197
+msgid "This took too long."
+msgstr ""
+
+#: facelock_gtk/enroll.py:199
+msgid "Face Not Added"
+msgstr ""
+
+#: facelock_gtk/main.py:66 facelock_gtk/window.py:52 facelock_gtk/window.py:99
+#: facelock_gtk/window.py:141
+msgid "Face Unlock"
+msgstr ""
+
+#: facelock_gtk/main.py:69
+msgid "Infrared face authentication with liveness detection"
+msgstr ""
+
+#: facelock_gtk/settings.py:16
+msgid "Settings"
+msgstr ""
+
+#: facelock_gtk/settings.py:23 facelock_gtk/settings.py:24
+msgid "Camera"
+msgstr ""
+
+#: facelock_gtk/settings.py:28
+msgid "Allow Regular Webcams"
+msgstr ""
+
+#: facelock_gtk/settings.py:29
+msgid "Only used when there is no infrared camera"
+msgstr ""
+
+#: facelock_gtk/settings.py:52 facelock_gtk/window.py:255
+msgid "No camera found"
+msgstr ""
+
+#: facelock_gtk/settings.py:55
+msgid "Infrared camera — protected against photos and screens"
+msgstr ""
+
+#: facelock_gtk/settings.py:57
+msgid "Regular webcam — weaker protection; the keyring is never unlocked"
+msgstr ""
+
+#: facelock_gtk/settings.py:60
+msgid "Connect an infrared camera, or allow regular webcams below"
+msgstr ""
+
+#: facelock_gtk/settings.py:75
+msgid "Allow Regular Webcams?"
+msgstr ""
+
+#: facelock_gtk/settings.py:77
+msgid ""
+"Without an infrared camera, a good photo or video of you may be able to "
+"unlock this computer. Your keyring will never be unlocked this way."
+msgstr ""
+
+#: facelock_gtk/settings.py:81 facelock_gtk/window.py:381
+#: facelock_gtk/window.py:415 facelock_gtk/window.py:467
+msgid "Cancel"
+msgstr ""
+
+#: facelock_gtk/settings.py:82
+msgid "Allow"
+msgstr ""
+
+#: facelock_gtk/tester.py:14
+msgid "Recognized"
+msgstr ""
+
+#: facelock_gtk/tester.py:15
+msgid "No face enrolled"
+msgstr ""
+
+#: facelock_gtk/tester.py:16
+msgid "No face detected"
+msgstr ""
+
+#: facelock_gtk/tester.py:17
+msgid "Face not recognized"
+msgstr ""
+
+#: facelock_gtk/tester.py:18
+msgid "The IR emitter is not blinking"
+msgstr ""
+
+#: facelock_gtk/tester.py:19
+msgid "Too little infrared reflected (screen? too far?)"
+msgstr ""
+
+#: facelock_gtk/tester.py:20
+msgid "Eye reflections don't match the enrolled face"
+msgstr ""
+
+#: facelock_gtk/tester.py:22
+msgid "Too many failures, try again later"
+msgstr ""
+
+#: facelock_gtk/tester.py:23
+msgid "Camera unavailable"
+msgstr ""
+
+#: facelock_gtk/tester.py:43
+msgid "Eyes"
+msgstr ""
+
+#: facelock_gtk/tester.py:43
+msgid "Nose"
+msgstr ""
+
+#: facelock_gtk/tester.py:43
+msgid "Mouth corners"
+msgstr ""
+
+#: facelock_gtk/tester.py:46
+msgid "Live Measurements"
+msgstr ""
+
+#: facelock_gtk/tester.py:54
+msgid "Similarity"
+msgstr ""
+
+#: facelock_gtk/tester.py:55
+#, python-brace-format
+msgid "Needs at least {t:.2f} to unlock"
+msgstr ""
+
+#: facelock_gtk/tester.py:61
+msgid "Infrared Reflection"
+msgstr ""
+
+#: facelock_gtk/tester.py:61
+msgid "Light from the emitter bouncing off your face"
+msgstr ""
+
+#: facelock_gtk/tester.py:62
+msgid "Head Position"
+msgstr ""
+
+#: facelock_gtk/tester.py:62
+msgid "Left/right and up/down angle"
+msgstr ""
+
+#: facelock_gtk/tester.py:63
+msgid "Eye Reflections"
+msgstr ""
+
+#: facelock_gtk/tester.py:63
+msgid "What the emitter's glints suggest"
+msgstr ""
+
+#: facelock_gtk/tester.py:65
+msgid "Test Authentication"
+msgstr ""
+
+#: facelock_gtk/tester.py:130
+msgid "left"
+msgstr ""
+
+#: facelock_gtk/tester.py:130
+msgid "right"
+msgstr ""
+
+#: facelock_gtk/tester.py:130
+msgid "center"
+msgstr ""
+
+#: facelock_gtk/tester.py:133
+msgid "Glasses"
+msgstr ""
+
+#: facelock_gtk/tester.py:133
+msgid "Bare eyes"
+msgstr ""
+
+#: facelock_gtk/tester.py:133
+msgid "Undecided"
+msgstr ""
+
+#: facelock_gtk/tester.py:139
+msgid "Look at the camera…"
+msgstr ""
+
+#: facelock_gtk/tester.py:154
+msgid "Test failed"
+msgstr ""
+
+#: facelock_gtk/tester.py:158
+msgid "Unlocked"
+msgstr ""
+
+#: facelock_gtk/tester.py:160
+msgid "Not unlocked"
+msgstr ""
+
+#: facelock_gtk/window.py:16
+msgid "Terminal (sudo)"
+msgstr ""
+
+#: facelock_gtk/window.py:17
+msgid "Login and Lock Screen"
+msgstr ""
+
+#: facelock_gtk/window.py:18
+msgid "Administrator Prompts"
+msgstr ""
+
+#: facelock_gtk/window.py:19
+msgid "Keyring"
+msgstr ""
+
+#: facelock_gtk/window.py:72
+msgid "Retry"
+msgstr ""
+
+#: facelock_gtk/window.py:76
+msgid "Service Not Available"
+msgstr ""
+
+#: facelock_gtk/window.py:77 facelock_gtk/window.py:214
+msgid ""
+"The facelock service could not be reached. Install the “facelock” package, "
+"then try again."
+msgstr ""
+
+#: facelock_gtk/window.py:86
+msgid "Unlock With Your Face"
+msgstr ""
+
+#: facelock_gtk/window.py:87
+msgid ""
+"Use the infrared camera to unlock sudo, the lock screen and system prompts."
+msgstr ""
+
+#: facelock_gtk/window.py:152
+msgid "Use Your Face For"
+msgstr ""
+
+#: facelock_gtk/window.py:164
+msgid "Add"
+msgstr ""
+
+#: facelock_gtk/window.py:167
+msgid "Your Faces"
+msgstr ""
+
+#: facelock_gtk/window.py:185
+msgid "See what the camera detects and try unlocking"
+msgstr ""
+
+#: facelock_gtk/window.py:196
+msgid "Camera Settings"
+msgstr ""
+
+#: facelock_gtk/window.py:197
+msgid "About Face Unlock"
+msgstr ""
+
+#: facelock_gtk/window.py:249
+msgid "Infrared camera ready"
+msgstr ""
+
+#: facelock_gtk/window.py:252
+msgid "Regular webcam — weaker protection"
+msgstr ""
+
+#: facelock_gtk/window.py:264 facelock_gtk/window.py:275
+msgid "Waiting…"
+msgstr ""
+
+#: facelock_gtk/window.py:266
+msgid "Needs an infrared camera"
+msgstr ""
+
+#: facelock_gtk/window.py:268
+msgid "Turn on Login first"
+msgstr ""
+
+#: facelock_gtk/window.py:270
+msgid "Unlocked at login"
+msgstr ""
+
+#: facelock_gtk/window.py:270
+msgid "Asks for your password"
+msgstr ""
+
+#: facelock_gtk/window.py:275
+msgid "On"
+msgstr ""
+
+#: facelock_gtk/window.py:275
+msgid "Off"
+msgstr ""
+
+#: facelock_gtk/window.py:290
+msgid "If you sometimes wear glasses, add one face with them and one without."
+msgstr ""
+
+#: facelock_gtk/window.py:301
+msgid "Add again"
+msgstr ""
+
+#: facelock_gtk/window.py:303
+msgid "With glasses"
+msgstr ""
+
+#: facelock_gtk/window.py:305
+#, python-brace-format
+msgid "{n} positions"
+msgstr ""
+
+#: facelock_gtk/window.py:314
+msgid "Rename…"
+msgstr ""
+
+#: facelock_gtk/window.py:315
+msgid "Remove…"
+msgstr ""
+
+#: facelock_gtk/window.py:319
+msgid "Made with an older recognition model — add it again"
+msgstr ""
+
+#: facelock_gtk/window.py:366
+msgid "Keyring will ask for your password again"
+msgstr ""
+
+#: facelock_gtk/window.py:371
+msgid "Unlock Keyring With Your Face?"
+msgstr ""
+
+#: facelock_gtk/window.py:373
+msgid ""
+"Your login password will be stored on this computer, encrypted by its TPM "
+"chip. It cannot be read from another computer or if the disk is removed, but "
+"an administrator of this running system could recover it.\n"
+"\n"
+"If you change your password or update the firmware, turn this option on "
+"again."
+msgstr ""
+
+#: facelock_gtk/window.py:379
+msgid "Login password"
+msgstr ""
+
+#: facelock_gtk/window.py:382
+msgid "Turn On"
+msgstr ""
+
+#: facelock_gtk/window.py:402
+msgid "Your keyring will unlock when you log in with your face"
+msgstr ""
+
+#: facelock_gtk/window.py:404
+msgid "Wrong password"
+msgstr ""
+
+#: facelock_gtk/window.py:428
+msgid "Without glasses"
+msgstr ""
+
+#: facelock_gtk/window.py:428 facelock_gtk/window.py:438
+msgid "My face"
+msgstr ""
+
+#: facelock_gtk/window.py:431
+msgid ""
+"Give it a name, for example “With glasses”. You'll then slowly turn your "
+"head while the camera captures several positions."
+msgstr ""
+
+#: facelock_gtk/window.py:433
+msgid "Start"
+msgstr ""
+
+#: facelock_gtk/window.py:460
+msgid "Rename Face"
+msgstr ""
+
+#: facelock_gtk/window.py:460
+msgid "Rename"
+msgstr ""
+
+#: facelock_gtk/window.py:464
+#, python-brace-format
+msgid "Remove “{label}”?"
+msgstr ""
+
+#: facelock_gtk/window.py:465
+msgid "You won't be able to unlock with this face anymore."
+msgstr ""
+
+#: facelock_gtk/window.py:468
+msgid "Remove"
+msgstr ""
+
+#: facelock_gtk/window.py:480
+#, python-brace-format
+msgid "“{label}” removed"
+msgstr ""

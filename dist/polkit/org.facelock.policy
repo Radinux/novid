@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>Facelock</vendor>
+  <action id="org.facelock.enroll">
+    <description>Manage your own face profiles</description>
+    <description xml:lang="fr">Gérer tes propres visages enregistrés</description>
+    <message>Authentication is required to manage your face profiles</message>
+    <message xml:lang="fr">Une authentification est nécessaire pour gérer tes visages</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_self_keep</allow_active>
+    </defaults>
+  </action>
+  <action id="org.facelock.manage">
+    <description>Manage face profiles of other users</description>
+    <description xml:lang="fr">Gérer les visages des autres utilisateurs</description>
+    <message>Authentication is required to manage another user's face profiles</message>
+    <message xml:lang="fr">Une authentification administrateur est nécessaire pour gérer les visages d'un autre utilisateur</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+  <action id="org.facelock.configure">
+    <description>Configure face authentication for the system</description>
+    <description xml:lang="fr">Configurer l'authentification faciale du système</description>
+    <message>Authentication is required to change where face authentication is used</message>
+    <message xml:lang="fr">Une authentification administrateur est nécessaire pour modifier où l'authentification faciale est utilisée</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+</policyconfig>

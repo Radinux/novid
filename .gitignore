@@ -1,0 +1,21 @@
+/target
+/dataset
+/dev-faces.json
+*.png
+/dev-state
+
+# makepkg output and working dirs
+/dist/arch/pkg/
+/dist/arch/src/
+*.pkg.tar.zst
+
+# generated translations (built from gtk/po/*.po)
+/gtk/build/
+/gtk/messages.mo
+*.po~
+
+# Python
+__pycache__/
+
+# ONNX models: large binaries, fetched at package build time
+/models/*.onnx
