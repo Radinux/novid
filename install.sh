@@ -65,6 +65,8 @@ done
 [ "$PURGE" = 1 ] && [ "$ACTION" != uninstall ] && die "--purge only goes with --uninstall"
 [ "$(id -u)" = 0 ] && die "run this as your normal user (sudo is asked when needed)"
 command -v sudo >/dev/null || die "sudo is required"
+# pacman/apt prompts read stdin; without a terminal they abort after the build.
+[ "$YES" = 0 ] && [ ! -t 0 ] && die "no terminal to answer the prompts; rerun with --yes"
 
 [ -r /etc/os-release ] || die "cannot identify the distribution (/etc/os-release missing)"
 # shellcheck disable=SC1091
