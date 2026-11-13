@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+case "$1" in
+  remove | deconfigure)
+    # Take facelock out of /etc/pam.d before pam_facelock.so goes away, so
+    # no PAM stack is left pointing to a missing module.
+    /usr/bin/facelockd --disable-pam || true
+    if [ -d /run/systemd/system ]; then
+      systemctl stop facelockd.service || true
+    fi
+    ;;
+esac

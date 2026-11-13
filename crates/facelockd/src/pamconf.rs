@@ -4,13 +4,16 @@
 //! comment, and removal also drops any bare `pam_facelock.so` line (e.g. one
 //! added by hand). Everything else is kept byte for byte.
 //!
-//! * sudo, polkit-1: `auth sufficient pam_facelock.so` before the first auth
-//!   line.
-//! * gdm-password with pam_gnome_keyring: a jump over the password substack
-//!   so the keyring module still runs and receives the sealed password:
-//!   `auth [success=N default=ignore] pam_facelock.so keyring`, and the
-//!   `include system-local-login` becomes `substack` (jumps cannot skip over
-//!   an `include` as a unit). That rewrite is marked and reverted on removal.
+//! The facelock line goes right before the password stack: `auth include
+//! system-auth` / `system-local-login` (Arch) or `@include common-auth`
+//! (Debian), so checks placed ahead of it (nologin, root) still run first.
+//!
+//! * sudo, polkit-1: `auth sufficient pam_facelock.so`.
+//! * gdm-password with pam_gnome_keyring: a jump over the password stack so
+//!   the keyring module still runs and receives the sealed password:
+//!   `auth [success=1 default=ignore] pam_facelock.so keyring`. The stack
+//!   becomes a `substack` (jumps cannot skip over an `include` as a unit);
+//!   that rewrite is marked and reverted on removal.
 
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
@@ -22,6 +25,7 @@ pub const SERVICES: [&str; 3] = ["sudo", "gdm-password", "polkit-1"];
 
 const MARK: &str = "# facelock: face authentication (managed by facelock, do not edit)";
 const MARK_SUBSTACK: &str = "# facelock: include changed to substack (reverted when facelock is disabled)";
+const MARK_AT_INCLUDE: &str = "# facelock: @include changed to substack (reverted when facelock is disabled)";
 
 fn is_auth(line: &str) -> bool {
     let t = line.trim_start();
@@ -33,6 +37,17 @@ fn is_ours(line: &str) -> bool {
     !t.starts_with('#') && t.split_whitespace().any(|w| w == "pam_facelock.so" || w.ends_with("/pam_facelock.so"))
 }
 
+/// Debian's `@include common-auth`, which is not an `auth` line itself.
+fn is_at_include_auth(line: &str) -> bool {
+    let mut words = line.split_whitespace();
+    words.next() == Some("@include") && words.next() == Some("common-auth")
+}
+
+/// The password stack: an auth include/substack, or Debian's common-auth.
+fn is_auth_stack(line: &str) -> bool {
+    (is_auth(line) && matches!(line.split_whitespace().nth(1), Some("include" | "substack"))) || is_at_include_auth(line)
+}
+
 pub fn is_enabled(content: &str) -> bool {
     content.lines().any(|l| is_auth(l) && is_ours(l))
 }
@@ -40,21 +55,20 @@ pub fn is_enabled(content: &str) -> bool {
 /// Removes everything facelock added, reverting the substack rewrite.
 pub fn disable(content: &str) -> String {
     let mut out = Vec::new();
-    let mut revert_next = false;
+    let mut revert_next: Option<&str> = None;
     for line in content.lines() {
         if line.trim() == MARK || is_ours(line) {
             continue;
         }
-        if line.trim() == MARK_SUBSTACK {
-            revert_next = true;
+        if line.trim() == MARK_SUBSTACK || line.trim() == MARK_AT_INCLUDE {
+            revert_next = Some(line.trim());
             continue;
         }
-        if revert_next {
-            revert_next = false;
-            out.push(line.replacen("substack", "include", 1));
-            continue;
+        match revert_next.take() {
+            Some(MARK_SUBSTACK) => out.push(line.replacen("substack", "include", 1)),
+            Some(_) => out.push(format!("@include {}", line.split_whitespace().last().unwrap_or("common-auth"))),
+            None => out.push(line.to_string()),
         }
-        out.push(line.to_string());
     }
     let mut s = out.join("\n");
     if content.ends_with('\n') {
@@ -66,35 +80,34 @@ pub fn disable(content: &str) -> String {
 pub fn enable(content: &str, service: &str) -> Result<String> {
     let base = disable(content);
     let lines: Vec<&str> = base.lines().collect();
-    let Some(first_auth) = lines.iter().position(|l| is_auth(l)) else {
+    let Some(at) = lines.iter().position(|l| is_auth_stack(l)).or_else(|| lines.iter().position(|l| is_auth(l)))
+    else {
         bail!("no auth line in {service}");
     };
     let has_keyring = lines.iter().any(|l| is_auth(l) && l.contains("pam_gnome_keyring.so"));
 
-    let mut out: Vec<String> = lines[..first_auth].iter().map(|s| s.to_string()).collect();
+    let mut out: Vec<String> = lines[..at].iter().map(|s| s.to_string()).collect();
+    out.push(MARK.into());
     if service == "gdm-password" && has_keyring {
-        // The password path: first include/substack of an auth stack.
-        let Some(stack) = (first_auth..lines.len()).find(|&i| {
-            is_auth(lines[i]) && matches!(lines[i].split_whitespace().nth(1), Some("include" | "substack"))
-        }) else {
+        let stack = lines[at];
+        if !is_auth_stack(stack) {
             bail!("gdm-password: no auth include/substack line found");
-        };
-        // Jump over every auth module from here to the password substack.
-        let skip = (first_auth..=stack).filter(|&i| is_auth(lines[i])).count();
-        out.push(MARK.into());
-        out.push(format!("auth       [success={skip} default=ignore]  pam_facelock.so keyring"));
-        for (i, l) in lines.iter().enumerate().skip(first_auth) {
-            if i == stack && l.split_whitespace().nth(1) == Some("include") {
-                out.push(MARK_SUBSTACK.into());
-                out.push(l.replacen("include", "substack", 1));
-            } else {
-                out.push(l.to_string());
-            }
         }
+        // Jump over the password stack, landing on the keyring module.
+        out.push("auth       [success=1 default=ignore]  pam_facelock.so keyring".into());
+        if is_at_include_auth(stack) {
+            out.push(MARK_AT_INCLUDE.into());
+            out.push("auth       substack                    common-auth".into());
+        } else if stack.split_whitespace().nth(1) == Some("include") {
+            out.push(MARK_SUBSTACK.into());
+            out.push(stack.replacen("include", "substack", 1));
+        } else {
+            out.push(stack.to_string());
+        }
+        out.extend(lines[at + 1..].iter().map(|s| s.to_string()));
     } else {
-        out.push(MARK.into());
         out.push("auth       sufficient   pam_facelock.so".into());
-        out.extend(lines[first_auth..].iter().map(|s| s.to_string()));
+        out.extend(lines[at..].iter().map(|s| s.to_string()));
     }
     let mut s = out.join("\n");
     s.push('\n');
@@ -168,14 +181,14 @@ mod tests {
         assert!(!is_enabled(&off));
         assert!(off.starts_with("auth sufficient pam_howdy.so\n"));
         let on = enable(&off, "sudo").unwrap();
-        assert!(on.starts_with(&format!("{MARK}\nauth       sufficient   pam_facelock.so\nauth sufficient pam_howdy.so\n")));
+        assert!(on.contains(&format!("#%PAM-1.0\n{MARK}\nauth       sufficient   pam_facelock.so\nauth\t\tinclude\t\tsystem-auth\n")));
         assert_eq!(disable(&on), off);
     }
 
     #[test]
     fn polkit_roundtrip() {
         let on = enable(POLKIT, "polkit-1").unwrap();
-        assert!(on.contains(&format!("\n{MARK}\nauth       sufficient   pam_facelock.so\nauth      sufficient pam_howdy.so\n")));
+        assert!(on.contains(&format!("pam_howdy.so\n{MARK}\nauth       sufficient   pam_facelock.so\nauth      include    system-auth\n")));
         assert_eq!(disable(&on), POLKIT);
         // Idempotent.
         assert_eq!(enable(&on, "polkit-1").unwrap(), on);
@@ -185,12 +198,41 @@ mod tests {
     fn gdm_jumps_to_keyring() {
         let on = enable(GDM, "gdm-password").unwrap();
         let auth: Vec<&str> = on.lines().filter(|l| is_auth(l)).collect();
-        assert_eq!(auth[0], "auth       [success=2 default=ignore]  pam_facelock.so keyring");
-        assert_eq!(auth[1], "auth sufficient pam_howdy.so");
+        assert_eq!(auth[0], "auth sufficient pam_howdy.so");
+        assert_eq!(auth[1], "auth       [success=1 default=ignore]  pam_facelock.so keyring");
         assert_eq!(auth[2], "auth       substack                     system-local-login");
         assert!(auth[3].contains("pam_gnome_keyring.so"));
         // Other stacks untouched.
         assert!(on.contains("account    include                     system-local-login"));
         assert_eq!(disable(&on), GDM);
+    }
+
+    // Debian 13 stock files.
+    const DEB_SUDO: &str = "#%PAM-1.0\n\n# Set up user limits from /etc/security/limits.conf.\nsession    required   pam_limits.so\n\n@include common-auth\n@include common-account\n@include common-session-noninteractive\n";
+    const DEB_GDM: &str = "#%PAM-1.0\nauth    requisite       pam_nologin.so\nauth\trequired\tpam_succeed_if.so user != root quiet_success\n@include common-auth\nauth    optional        pam_gnome_keyring.so\n@include common-account\nsession required        pam_loginuid.so\nsession optional        pam_gnome_keyring.so auto_start\n@include common-password\n";
+
+    #[test]
+    fn debian_sudo_roundtrip() {
+        let on = enable(DEB_SUDO, "sudo").unwrap();
+        assert!(on.contains(&format!("\n{MARK}\nauth       sufficient   pam_facelock.so\n@include common-auth\n")));
+        assert!(is_enabled(&on));
+        assert_eq!(disable(&on), DEB_SUDO);
+        assert_eq!(enable(&on, "sudo").unwrap(), on);
+    }
+
+    #[test]
+    fn debian_gdm_jumps_to_keyring() {
+        let on = enable(DEB_GDM, "gdm-password").unwrap();
+        let auth: Vec<&str> = on.lines().filter(|l| is_auth(l)).collect();
+        // nologin and the root check still run before the face.
+        assert!(auth[0].contains("pam_nologin.so"));
+        assert!(auth[1].contains("pam_succeed_if.so"));
+        assert_eq!(auth[2], "auth       [success=1 default=ignore]  pam_facelock.so keyring");
+        assert_eq!(auth[3], "auth       substack                    common-auth");
+        assert!(auth[4].contains("pam_gnome_keyring.so"));
+        assert!(!on.contains("@include common-auth"));
+        assert!(on.contains("@include common-account"));
+        assert_eq!(disable(&on), DEB_GDM);
+        assert_eq!(enable(&on, "gdm-password").unwrap(), on);
     }
 }

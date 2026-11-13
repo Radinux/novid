@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+if [ "$1" = configure ] && [ -d /run/systemd/system ]; then
+  systemctl daemon-reload || true
+  systemctl reload dbus.service 2>/dev/null || true
+  # A running daemon keeps the old binary until it is restarted.
+  systemctl try-restart facelockd.service || true
+fi

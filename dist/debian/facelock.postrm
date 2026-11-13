@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+case "$1" in
+  remove)
+    if [ -d /run/systemd/system ]; then
+      systemctl daemon-reload || true
+    fi
+    ;;
+  purge)
+    # Enrolled faces, the sealed keyring secret and the PAM backups.
+    rm -rf /var/lib/facelock
+    rmdir --ignore-fail-on-non-empty /etc/facelock 2>/dev/null || true
+    ;;
+esac

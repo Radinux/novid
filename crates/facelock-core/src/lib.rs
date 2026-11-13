@@ -19,9 +19,15 @@ use ort::environment::Environment;
 use ort::session::Session;
 use ort::session::builder::GraphOptimizationLevel;
 
-/// Loads the system ONNX Runtime (`onnxruntime-cpu` on Arch).
+/// Where ONNX Runtime is looked for, after `$FACELOCK_ORT_LIB`: the copy
+/// bundled by the Debian package, then the system one (`onnxruntime` on Arch).
+const ORT_LIBS: [&str; 2] = ["/usr/lib/facelock/libonnxruntime.so", "/usr/lib/libonnxruntime.so"];
+
 pub fn ort_env() -> Result<Environment> {
-    let lib = std::env::var("FACELOCK_ORT_LIB").unwrap_or_else(|_| "/usr/lib/libonnxruntime.so".into());
+    let lib = std::env::var("FACELOCK_ORT_LIB").unwrap_or_else(|_| {
+        let found = ORT_LIBS.iter().find(|p| Path::new(p).exists());
+        found.unwrap_or(&ORT_LIBS[1]).to_string()
+    });
     Ok(ort::init_from(lib)?.with_name("facelock").build()?)
 }
 

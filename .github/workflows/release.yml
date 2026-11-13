@@ -1,0 +1,84 @@
+# Builds the .deb packages on Debian 13 (the oldest supported glibc), checks
+# that they install, load the models and uninstall cleanly, and attaches them
+# to the GitHub release of a v* tag.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deb:
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential dpkg-dev pkg-config clang libclang-dev libdbus-1-dev libpam0g-dev libcrypt-dev \
+            gettext curl ca-certificates git
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      - name: Test
+        run: cargo test --locked -p facelockd
+      - name: Fetch the models
+        run: dist/fetch-models.sh
+      - name: Build the packages
+        run: dist/debian/build-deb.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: target/deb/*.deb
+          if-no-files-found: error
+
+  smoke-test:
+    needs: deb
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb
+      - name: Install
+        run: |
+          apt-get update
+          apt-get install -y ./facelock_*.deb ./facelock-gtk_*.deb dbus-daemon
+      - name: Load ONNX Runtime and the models
+        run: |
+          facelockd --version
+          timeout 30 dbus-run-session -- facelockd --session > log 2>&1 || true
+          cat log
+          grep -q 'models loaded' log
+      - name: Check the GTK app imports
+        run: python3 -c "import sys; sys.path.insert(0, '/usr/share/facelock-gtk'); import facelock_gtk"
+      - name: Uninstall
+        run: |
+          apt-get purge -y facelock-gtk facelock
+          test ! -e /usr/bin/facelockd
+          test ! -e /usr/lib/facelock
+
+  release:
+    needs: smoke-test
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber *.deb

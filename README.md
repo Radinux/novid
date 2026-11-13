@@ -23,12 +23,25 @@ optionally, your GNOME keyring at login.
 | `crates/pam-facelock` | `pam_facelock.so` |
 | `crates/facelock-cli` | `facelock` command-line client |
 | `gtk/` | `facelock-gtk`, the GTK4 / libadwaita app (Python) |
-| `dist/` | systemd, D-Bus and polkit files, default config, Arch PKGBUILD |
+| `dist/` | systemd, D-Bus and polkit files, default config, Arch PKGBUILD, Debian package build |
 
 ## Install
 
 Requirements: an infrared camera, systemd, and Arch Linux or Debian 13 /
 Ubuntu 25.04 (or derivatives). A TPM2 is needed only for the keyring option.
+
+### Debian / Ubuntu: prebuilt packages
+
+Download `facelock_*.deb` and `facelock-gtk_*.deb` from the
+[latest release](https://github.com/Radinux/facelock/releases/latest), then:
+
+```sh
+sudo apt install ./facelock_*.deb ./facelock-gtk_*.deb
+```
+
+The packages bundle ONNX Runtime (in `/usr/lib/facelock`) and the models.
+
+### From source
 
 ```sh
 git clone https://github.com/Radinux/facelock.git
@@ -40,9 +53,9 @@ Run it as your normal user; it asks for sudo when needed.
 
 - **Arch** and derivatives: builds the `facelock` and `facelock-gtk` packages
   with `makepkg` and installs them with `pacman`.
-- **Debian / Ubuntu**: installs the dependencies with `apt`, installs Rust with
-  rustup if the packaged version is too old, builds with `cargo`, and installs
-  ONNX Runtime from the official release when the system has none.
+- **Debian / Ubuntu**: installs the build dependencies with `apt`, installs
+  Rust with rustup if the packaged version is too old, then builds the `.deb`
+  packages (`dist/debian/build-deb.sh`) and installs them with `apt`.
 
 The ONNX models (YuNet, SFace) are downloaded from
 [OpenCV Zoo](https://github.com/opencv/opencv_zoo) and checked by SHA-256.
@@ -58,7 +71,8 @@ to add your face, then choose where to use it.
 ```
 
 facelock is removed from `/etc/pam.d` first, so no PAM stack is left pointing
-to a missing module (on Arch, `pacman -R facelock` does the same).
+to a missing module (`pacman -R facelock` and `apt remove facelock` do the
+same; `apt purge` also deletes the enrolled faces).
 
 ## Configuration
 

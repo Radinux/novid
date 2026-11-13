@@ -8,8 +8,8 @@
 #   -y, --yes                         don't ask for confirmation
 #
 # Arch and derivatives: builds packages with makepkg, installs them with pacman.
-# Debian / Ubuntu: installs dependencies with apt, builds with cargo and copies
-# the files (listed in a manifest for --uninstall).
+# Debian / Ubuntu: installs the build dependencies with apt, builds .deb
+# packages (dist/debian/build-deb.sh) and installs them with apt.
 #
 # Run it as your normal user from a clone of the repository; sudo is used for
 # the steps that need root. Face authentication is not turned on anywhere by
@@ -19,22 +19,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 cd "$ROOT"
 
-# ONNX models (OpenCV Zoo), checked by SHA-256.
-MODELS_URL="https://github.com/opencv/opencv_zoo/raw/main/models"
-YUNET="face_detection_yunet_2026may.onnx"
-YUNET_SHA="ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
-SFACE="face_recognition_sface_2021dec.onnx"
-SFACE_SHA="0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79"
-
-# ONNX Runtime for Debian/Ubuntu when the system has none (Arch packages it).
-ORT_VERSION="1.24.1"
-ORT_SHA_x64="9142552248b735920f9390027e4512a2cacf8946a1ffcbe9071a5c210531026f"
-ORT_SHA_aarch64="0f56edd68f7602df790b68b874a46b115add037e88385c6c842bb763b39b9f89"
-ORT_DIR="/usr/lib/facelock/onnxruntime"
-ORT_DROPIN="/etc/systemd/system/facelockd.service.d/onnxruntime.conf"
-
 MIN_RUST_MINOR=92 # ort needs Rust >= 1.92
-MANIFEST="/var/lib/facelock-install/manifest"
 
 ACTION=install
 PURGE=0
@@ -79,23 +64,7 @@ esac
 
 # -- shared ---------------------------------------------------------------
 
-fetch_models() {
-  mkdir -p models
-  local name sha
-  for pair in "$YUNET:$YUNET_SHA" "$SFACE:$SFACE_SHA"; do
-    name="${pair%%:*}"
-    sha="${pair##*:}"
-    if [ -f "models/$name" ] && echo "$sha  models/$name" | sha256sum -c --status; then
-      continue
-    fi
-    local sub=face_detection_yunet
-    [ "$name" = "$SFACE" ] && sub=face_recognition_sface
-    msg "Downloading model $name"
-    curl -fL# --retry 3 -o "models/$name.part" "$MODELS_URL/$sub/$name"
-    echo "$sha  models/$name.part" | sha256sum -c --status || { rm -f "models/$name.part"; die "checksum mismatch for $name"; }
-    mv "models/$name.part" "models/$name"
-  done
-}
+fetch_models() { "$ROOT/dist/fetch-models.sh"; }
 
 # Removes facelock from /etc/pam.d so nothing points to a missing module.
 disable_pam() {
@@ -142,16 +111,13 @@ arch_uninstall() {
 # -- Debian / Ubuntu ------------------------------------------------------
 
 deb_deps() {
-  msg "Installing dependencies (apt)"
+  msg "Installing build dependencies (apt)"
   local yes=()
   [ "$YES" = 1 ] && yes=(-y)
   sudo apt-get update
   sudo apt-get install "${yes[@]}" --no-install-recommends \
-    build-essential pkg-config clang libclang-dev libdbus-1-dev libpam0g-dev libcrypt-dev \
-    gettext curl ca-certificates \
-    dbus polkitd systemd \
-    python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
-    gtk-update-icon-cache desktop-file-utils
+    build-essential dpkg-dev pkg-config clang libclang-dev libdbus-1-dev libpam0g-dev libcrypt-dev \
+    gettext curl ca-certificates
 }
 
 rust_ok() {
@@ -176,131 +142,37 @@ deb_rust() {
   rust_ok || die "Rust >= 1.$MIN_RUST_MINOR still not available"
 }
 
-deb_check_adw() {
-  python3 - <<'EOF' || warn "libadwaita >= 1.6 and GTK >= 4.16 are needed for the app (Debian 13, Ubuntu 25.04 or newer)"
-import gi
-gi.require_version("Gtk", "4.0"); gi.require_version("Adw", "1")
-from gi.repository import Adw, Gtk
-raise SystemExit(0 if (Adw.get_minor_version() >= 6 and Gtk.get_minor_version() >= 16) else 1)
-EOF
-}
-
-STAGED=""
-inst() { # mode src dest
-  sudo install -Dm"$1" "$2" "$3"
-  STAGED+="$3"$'\n'
-}
-
-deb_onnxruntime() {
-  if ldconfig -p | grep -q 'libonnxruntime\.so'; then
-    msg "Using the system ONNX Runtime"
-    return
-  fi
-  local arch sha
-  case "$(uname -m)" in
-    x86_64) arch=x64; sha="$ORT_SHA_x64" ;;
-    aarch64) arch=aarch64; sha="$ORT_SHA_aarch64" ;;
-    *) die "no ONNX Runtime build for $(uname -m)" ;;
-  esac
-  local tmp name="onnxruntime-linux-$arch-$ORT_VERSION"
-  tmp="$(mktemp -d)"
-  msg "Downloading ONNX Runtime $ORT_VERSION"
-  curl -fL# --retry 3 -o "$tmp/$name.tgz" \
-    "https://github.com/microsoft/onnxruntime/releases/download/v$ORT_VERSION/$name.tgz"
-  echo "$sha  $tmp/$name.tgz" | sha256sum -c --status || { rm -rf "$tmp"; die "ONNX Runtime checksum mismatch"; }
-  tar -xzf "$tmp/$name.tgz" -C "$tmp"
-  inst 644 "$tmp/$name/lib/libonnxruntime.so.$ORT_VERSION" "$ORT_DIR/libonnxruntime.so.$ORT_VERSION"
-  inst 644 "$tmp/$name/lib/libonnxruntime_providers_shared.so" "$ORT_DIR/libonnxruntime_providers_shared.so"
-  rm -rf "$tmp"
-  # The daemon loads it through ort's ORT_DYLIB_PATH.
-  printf '[Service]\nEnvironment=ORT_DYLIB_PATH=%s/libonnxruntime.so.%s\n' "$ORT_DIR" "$ORT_VERSION" > "$ROOT/target/onnxruntime.conf"
-  inst 644 "$ROOT/target/onnxruntime.conf" "$ORT_DROPIN"
-}
-
 deb_install() {
   deb_deps
-  deb_check_adw
   deb_rust
   fetch_models
-
-  msg "Building (cargo)"
-  cargo build --release --locked -p facelockd -p facelock -p pam-facelock
-
-  local pam_unix pamdir
-  pam_unix="$(find /usr/lib /lib -name pam_unix.so -path '*/security/*' 2>/dev/null | head -n1)"
-  [ -n "$pam_unix" ] || die "cannot find the PAM module directory (pam_unix.so)"
-  pamdir="$(dirname "$pam_unix")"
-
-  # Stop a running daemon so its binary can be replaced.
-  sudo systemctl stop facelockd.service 2>/dev/null || true
-
-  msg "Installing files"
-  local t="$ROOT/target/release"
-  inst 755 "$t/facelockd" /usr/bin/facelockd
-  inst 755 "$t/facelock" /usr/bin/facelock
-  inst 755 "$t/libpam_facelock.so" "$pamdir/pam_facelock.so"
-  inst 644 dist/systemd/facelockd.service /usr/lib/systemd/system/facelockd.service
-  inst 644 dist/dbus/org.facelock.Daemon1.service /usr/share/dbus-1/system-services/org.facelock.Daemon1.service
-  inst 644 dist/dbus/org.facelock.Daemon1.conf /usr/share/dbus-1/system.d/org.facelock.Daemon1.conf
-  inst 644 dist/polkit/org.facelock.policy /usr/share/polkit-1/actions/org.facelock.policy
-  inst 644 "models/$YUNET" "/usr/share/facelock/models/$YUNET"
-  inst 644 "models/$SFACE" "/usr/share/facelock/models/$SFACE"
-  # Keep an existing configuration.
-  [ -e /etc/facelock/config.toml ] || sudo install -Dm644 dist/config.toml /etc/facelock/config.toml
-
-  inst 755 gtk/facelock-gtk /usr/bin/facelock-gtk
-  for f in gtk/facelock_gtk/*.py; do
-    inst 644 "$f" "/usr/share/facelock-gtk/facelock_gtk/$(basename "$f")"
-  done
-  inst 644 gtk/data/org.facelock.Facelock.desktop /usr/share/applications/org.facelock.Facelock.desktop
-  inst 644 gtk/data/icons/org.facelock.Facelock.svg /usr/share/icons/hicolor/scalable/apps/org.facelock.Facelock.svg
-  inst 644 gtk/data/icons/facelock-keyring-symbolic.svg /usr/share/icons/hicolor/symbolic/apps/facelock-keyring-symbolic.svg
-  for po in gtk/po/*.po; do
-    local lang mo
-    lang="$(basename "$po" .po)"
-    mo="$ROOT/target/locale/$lang/facelock-gtk.mo"
-    mkdir -p "$(dirname "$mo")"
-    msgfmt -o "$mo" "$po"
-    inst 644 "$mo" "/usr/share/locale/$lang/LC_MESSAGES/facelock-gtk.mo"
-  done
-
-  deb_onnxruntime
-
-  # Upgrade: drop files a previous install had that this one no longer ships.
-  if [ -f "$MANIFEST" ]; then
-    comm -23 <(sort -u "$MANIFEST") <(printf '%s' "$STAGED" | sort -u) | while IFS= read -r f; do
-      [ -n "$f" ] && sudo rm -f -- "$f"
-    done
-  fi
-  printf '%s' "$STAGED" | sudo install -Dm644 /dev/stdin "$MANIFEST"
-
-  msg "Reloading system services"
-  sudo systemctl daemon-reload
-  sudo systemctl reload dbus.service 2>/dev/null || true
-  sudo gtk-update-icon-cache -qtf /usr/share/icons/hicolor 2>/dev/null || true
-  sudo update-desktop-database -q /usr/share/applications 2>/dev/null || true
+  msg "Building the packages"
+  rm -rf target/deb
+  dist/debian/build-deb.sh
+  msg "Installing the packages (apt)"
+  local yes=()
+  [ "$YES" = 1 ] && yes=(-y)
+  # --reinstall: a rebuilt package with the same version must still replace
+  # the installed one.
+  sudo apt-get install "${yes[@]}" --reinstall "$ROOT"/target/deb/facelock_*.deb "$ROOT"/target/deb/facelock-gtk_*.deb
 }
 
 deb_uninstall() {
-  if [ ! -f "$MANIFEST" ]; then
-    msg "facelock is not installed (no $MANIFEST)"
+  local pkgs=()
+  for p in facelock-gtk facelock; do dpkg -s "$p" >/dev/null 2>&1 && pkgs+=("$p"); done
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    msg "facelock is not installed"
     return
   fi
-  disable_pam
-  sudo systemctl stop facelockd.service 2>/dev/null || true
-  msg "Removing files"
-  while IFS= read -r f; do
-    [ -n "$f" ] && sudo rm -f -- "$f"
-  done < "$MANIFEST"
-  sudo rm -f "$MANIFEST"
-  for d in /usr/share/facelock-gtk/facelock_gtk /usr/share/facelock-gtk /usr/share/facelock/models \
-    /usr/share/facelock "$ORT_DIR" /usr/lib/facelock "$(dirname "$ORT_DROPIN")" /var/lib/facelock-install; do
-    sudo rmdir --ignore-fail-on-non-empty "$d" 2>/dev/null || true
-  done
-  sudo systemctl daemon-reload
-  sudo systemctl reload dbus.service 2>/dev/null || true
-  sudo gtk-update-icon-cache -qtf /usr/share/icons/hicolor 2>/dev/null || true
-  sudo update-desktop-database -q /usr/share/applications 2>/dev/null || true
+  msg "Removing ${pkgs[*]}"
+  local yes=()
+  [ "$YES" = 1 ] && yes=(-y)
+  # The prerm script takes facelock out of /etc/pam.d first.
+  if [ "$PURGE" = 1 ]; then
+    sudo apt-get purge "${yes[@]}" "${pkgs[@]}"
+  else
+    sudo apt-get remove "${yes[@]}" "${pkgs[@]}"
+  fi
 }
 
 # -- main -----------------------------------------------------------------
