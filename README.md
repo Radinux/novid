@@ -36,7 +36,7 @@ Ubuntu 25.04 (or derivatives). A TPM2 is needed only for the keyring option.
 ### Debian / Ubuntu: prebuilt packages
 
 Download `facelock_*.deb` and `facelock-gtk_*.deb` from the
-[latest release](https://github.com/Radinux/facelock/releases/latest), then:
+[latest release](https://github.com/Radinux/novid/releases/latest), then:
 
 ```sh
 sudo apt install ./facelock_*.deb ./facelock-gtk_*.deb
@@ -47,8 +47,8 @@ The packages bundle ONNX Runtime (in `/usr/lib/facelock`) and the models.
 ### From source
 
 ```sh
-git clone https://github.com/Radinux/facelock.git
-cd facelock
+git clone https://github.com/Radinux/novid.git
+cd novid
 ./install.sh
 ```
 

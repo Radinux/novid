@@ -23,7 +23,7 @@ MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
 OUT="$ROOT/target/deb"
 WORK="$ROOT/target/deb-build"
 MAINTAINER="Radinux <Radinux@users.noreply.github.com>"
-HOMEPAGE="https://github.com/Radinux/facelock"
+HOMEPAGE="https://github.com/Radinux/novid"
 
 case "$ARCH" in
   amd64) ort_arch=x64; ort_sha="$ORT_SHA_amd64" ;;
