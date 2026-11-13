@@ -121,6 +121,8 @@ arch_install() {
   # No --needed: a rebuilt package with the same version must still replace
   # the installed one.
   (cd dist/arch && makepkg -sfi "${noconfirm[@]}")
+  # pacman doesn't restart services; a running daemon would keep the old binary.
+  sudo systemctl try-restart facelockd.service
 }
 
 arch_uninstall() {
