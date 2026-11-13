@@ -1,4 +1,4 @@
-# Facelock configuration. Every key is optional; defaults are shown.
+# NovID (facelock) configuration. Every key is optional; defaults are shown.
 
 [camera]
 # "auto" finds the IR camera (greyscale frames, strobing emitter). Or give a

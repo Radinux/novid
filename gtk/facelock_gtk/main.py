@@ -63,7 +63,7 @@ class App(Adw.Application):
         from gettext import gettext as _
 
         Adw.AboutDialog(
-            application_name=_("Face Unlock"),
+            application_name=_("NovID"),
             application_icon=APP_ID,
             version=VERSION,
             comments=_("Infrared face authentication with liveness detection"),

@@ -164,7 +164,7 @@ msgstr ""
 
 #: facelock_gtk/main.py:66 facelock_gtk/window.py:52 facelock_gtk/window.py:99
 #: facelock_gtk/window.py:141
-msgid "Face Unlock"
+msgid "NovID"
 msgstr ""
 
 #: facelock_gtk/main.py:69
@@ -411,7 +411,7 @@ msgid "Camera Settings"
 msgstr ""
 
 #: facelock_gtk/window.py:197
-msgid "About Face Unlock"
+msgid "About NovID"
 msgstr ""
 
 #: facelock_gtk/window.py:249

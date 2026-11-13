@@ -2,7 +2,7 @@
 <!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
-  <vendor>Facelock</vendor>
+  <vendor>NovID</vendor>
   <action id="org.facelock.enroll">
     <description>Manage your own face profiles</description>
     <description xml:lang="fr">Gérer tes propres visages enregistrés</description>

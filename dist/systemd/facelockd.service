@@ -1,5 +1,5 @@
 [Unit]
-Description=Facelock IR face authentication daemon
+Description=NovID (facelock) IR face authentication daemon
 Documentation=man:facelockd(8)
 
 [Service]

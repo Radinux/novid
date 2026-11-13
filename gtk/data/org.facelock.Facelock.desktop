@@ -1,13 +1,14 @@
 [Desktop Entry]
 Type=Application
-Name=Face Unlock
-Name[fr]=Déverrouillage facial
+Name=NovID
+GenericName=Face Unlock
+GenericName[fr]=Déverrouillage facial
 Comment=Unlock with your face using the infrared camera
 Comment[fr]=Déverrouille avec ton visage grâce à la caméra infrarouge
 Exec=facelock-gtk
 Icon=org.facelock.Facelock
 Terminal=false
 Categories=GTK;GNOME;Settings;Security;
-Keywords=face;howdy;infrared;IR;camera;unlock;login;sudo;
-Keywords[fr]=visage;howdy;infrarouge;IR;caméra;déverrouiller;connexion;sudo;
+Keywords=face;facelock;howdy;infrared;IR;camera;unlock;login;sudo;
+Keywords[fr]=visage;facial;facelock;howdy;infrarouge;IR;caméra;déverrouiller;connexion;sudo;
 StartupNotify=true

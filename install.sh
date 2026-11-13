@@ -189,6 +189,6 @@ if [ "$ACTION" = uninstall ]; then
   msg "facelock removed."
 else
   msg "facelock installed."
-  echo "    Open “Face Unlock” (facelock-gtk) to add your face and choose where to use it."
+  echo "    Open “NovID” (facelock-gtk) to add your face and choose where to use it."
   echo "    Your password keeps working everywhere as a fallback."
 fi

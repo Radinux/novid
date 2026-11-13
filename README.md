@@ -1,4 +1,4 @@
-# facelock
+# NovID
 
 Infrared face authentication for Linux, with liveness detection. Unlock
 `sudo`, the GDM login and lock screen, and polkit prompts with your face — and,
@@ -13,6 +13,9 @@ optionally, your GNOME keyring at login.
   at GDM login.
 - **GTK app**: guided enrollment, live recognition test, and toggles for where
   the face is used.
+
+The packages, commands and services keep the technical name `facelock`
+(`facelockd`, `pam_facelock.so`, `facelock-gtk`).
 
 ## Components
 
@@ -60,7 +63,7 @@ Run it as your normal user; it asks for sudo when needed.
 The ONNX models (YuNet, SFace) are downloaded from
 [OpenCV Zoo](https://github.com/opencv/opencv_zoo) and checked by SHA-256.
 
-Installing does not turn face authentication on anywhere. Open **Face Unlock**
+Installing does not turn face authentication on anywhere. Open **NovID**
 to add your face, then choose where to use it.
 
 ### Uninstall

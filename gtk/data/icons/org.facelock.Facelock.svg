@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
      width="128" height="128" viewBox="0 0 128 128">
-  <!-- Face Unlock app icon. 128×128 grid, GNOME style: a raised white tile
+  <!-- NovID app icon. 128×128 grid, GNOME style: a raised white tile
        (top face + bottom edge + drop shadow) carrying a blue face glyph.
        The glyph paths are in the coordinates of the original drawing
        (frame 42…722) and scaled into the tile by the group transform.

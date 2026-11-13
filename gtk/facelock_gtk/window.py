@@ -49,7 +49,7 @@ class Tile(Gtk.Button):
 
 class Window(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, title=_("Face Unlock"), default_width=560, default_height=800)
+        super().__init__(application=app, title=_("NovID"), default_width=560, default_height=800)
         self.add_css_class("m3")
         style = Adw.StyleManager.get_default()
         style.connect("notify::dark", lambda sm, _p: self._sync_dark(sm))
@@ -96,7 +96,7 @@ class Window(Adw.ApplicationWindow):
         header.pack_end(menu)
         tv = Adw.ToolbarView(content=self.stack, top_bar_style=Adw.ToolbarStyle.FLAT)
         tv.add_top_bar(header)
-        self.nav.add(Adw.NavigationPage(title=_("Face Unlock"), child=tv, tag="main"))
+        self.nav.add(Adw.NavigationPage(title=_("NovID"), child=tv, tag="main"))
 
         for name, cb in (
             ("settings", lambda *_: self.open_settings()),
@@ -138,7 +138,7 @@ class Window(Adw.ApplicationWindow):
         head = Gtk.Box(spacing=16, margin_bottom=14, margin_start=4)
         head.append(Gtk.Image(icon_name=APP_ID, pixel_size=72, css_classes=["hero-icon"]))
         titles = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, valign=Gtk.Align.CENTER)
-        titles.append(Gtk.Label(label=_("Face Unlock"), css_classes=["m3-headline"], xalign=0, wrap=True))
+        titles.append(Gtk.Label(label=_("NovID"), css_classes=["m3-headline"], xalign=0, wrap=True))
         cam = Gtk.Box(spacing=8, css_classes=["m3-chip"], halign=Gtk.Align.START)
         self.cam_dot = Gtk.Box(css_classes=["status-dot"], valign=Gtk.Align.CENTER)
         self.cam_label = Gtk.Label(xalign=0, wrap=True)
@@ -194,7 +194,7 @@ class Window(Adw.ApplicationWindow):
         m.append(_("Add a Face"), "win.add-face")
         m.append(_("Test Recognition"), "win.test")
         m.append(_("Camera Settings"), "win.settings")
-        m.append(_("About Face Unlock"), "app.about")
+        m.append(_("About NovID"), "app.about")
         return m
 
     def open_settings(self):
