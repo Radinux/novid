@@ -3,6 +3,8 @@
 //! `facelockd` runs on the system bus as root (systemd, D-Bus activated).
 //! `facelockd --session [--config FILE]` runs as the current user on the
 //! session bus for development: no polkit, own account only.
+//! `facelockd --disable-pam` removes facelock from every PAM service file and
+//! exits (used before uninstalling, so no stack points to a missing module).
 
 mod dbus;
 mod pamconf;
@@ -25,10 +27,12 @@ async fn main() -> Result<()> {
 
     let mut args = std::env::args().skip(1);
     let mut session = false;
+    let mut disable_pam = false;
     let mut cfg_path = PathBuf::from(config::DEFAULT_PATH);
     while let Some(a) = args.next() {
         match a.as_str() {
             "--session" => session = true,
+            "--disable-pam" => disable_pam = true,
             "--config" => cfg_path = args.next().context("--config needs a path")?.into(),
             "--version" => {
                 println!("facelockd {}", env!("CARGO_PKG_VERSION"));
@@ -36,6 +40,10 @@ async fn main() -> Result<()> {
             }
             other => anyhow::bail!("unknown argument {other}"),
         }
+    }
+
+    if disable_pam {
+        return disable_all_pam(&cfg_path);
     }
 
     let cfg = Arc::new(Config::load(&cfg_path)?);
@@ -52,5 +60,22 @@ async fn main() -> Result<()> {
 
     tokio::signal::ctrl_c().await?;
     info!("shutting down");
+    Ok(())
+}
+
+/// Turns face authentication off in every PAM service file we manage.
+fn disable_all_pam(cfg_path: &std::path::Path) -> Result<()> {
+    let state_dir = Config::load(cfg_path).map(|c| c.storage.dir).unwrap_or_else(|_| "/var/lib/facelock".into());
+    let pam = pamconf::PamFiles::new(&state_dir);
+    for svc in pamconf::SERVICES {
+        match pam.status(svc) {
+            None => continue, // service file not present
+            Some(false) => println!("{svc}: not enabled"),
+            Some(true) => {
+                pam.set(svc, false).with_context(|| format!("disabling facelock in {svc}"))?;
+                println!("{svc}: facelock removed");
+            }
+        }
+    }
     Ok(())
 }

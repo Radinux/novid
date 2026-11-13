@@ -1,12 +1,13 @@
-# Local development PKGBUILD: builds the working tree two levels up.
-# The AUR version will fetch a tagged release and the models instead.
+# Builds the working tree two levels up (used by install.sh and for local
+# development). The ONNX models must be in ../../models: install.sh fetches
+# them. The AUR version will fetch a tagged release and the models instead.
 pkgbase=facelock
 pkgname=('facelock' 'facelock-gtk')
 pkgver=0.1.0
-pkgrel=14
+pkgrel=15
 arch=('x86_64')
 license=('GPL-3.0-or-later')
-makedepends=('cargo' 'gettext')
+makedepends=('cargo' 'clang' 'gettext')
 options=('!lto' '!debug')
 
 _root="$(realpath "$startdir/../..")"
@@ -27,7 +28,8 @@ build() {
 package_facelock() {
   pkgdesc="IR face authentication with liveness detection (daemon, PAM module, CLI)"
   license=('GPL-3.0-or-later' 'MIT' 'Apache-2.0')
-  depends=('onnxruntime' 'dbus' 'pam' 'polkit' 'systemd')
+  depends=('onnxruntime' 'dbus' 'pam' 'polkit' 'systemd' 'libxcrypt')
+  install=facelock.install
   optdepends=('facelock-gtk: graphical face management')
   backup=('etc/facelock/config.toml')
 
