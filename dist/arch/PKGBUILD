@@ -3,8 +3,8 @@
 # them. The AUR version will fetch a tagged release and the models instead.
 pkgbase=facelock
 pkgname=('facelock' 'facelock-gtk')
-pkgver=0.1.1
-pkgrel=2
+pkgver=0.1.2
+pkgrel=1
 arch=('x86_64')
 license=('GPL-3.0-or-later')
 makedepends=('cargo' 'clang' 'gettext')

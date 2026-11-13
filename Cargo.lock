@@ -320,7 +320,7 @@ dependencies = [
 
 [[package]]
 name = "facelock"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "clap",
@@ -334,7 +334,7 @@ dependencies = [
 
 [[package]]
 name = "facelock-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "log",
@@ -350,7 +350,7 @@ dependencies = [
 
 [[package]]
 name = "facelockd"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -804,7 +804,7 @@ checksum = "8d22b0417f1838db5a3ac0b3f98dfe39f6fb73624aa0a27c6bbb5040b9c7db2b"
 
 [[package]]
 name = "pam-facelock"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "dbus",
  "libc",
