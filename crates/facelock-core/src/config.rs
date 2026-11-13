@@ -47,6 +47,9 @@ pub struct VerifyConfig {
     pub threshold: f32,
     /// Matching frames needed before deciding.
     pub min_matches: u32,
+    /// Two matching frames at or above this similarity are enough, without
+    /// waiting for `min_matches`. 1.0 turns the shortcut off.
+    pub fast_threshold: f32,
     pub timeout_ms: u64,
     /// Refuse when the IR emitter is not strobing (no lit/dark pairs).
     pub require_strobe: bool,
@@ -64,6 +67,7 @@ impl Default for VerifyConfig {
         Self {
             threshold: 0.5,
             min_matches: 3,
+            fast_threshold: 0.8,
             timeout_ms: 4000,
             require_strobe: true,
             min_emitter_gain: 30.0,

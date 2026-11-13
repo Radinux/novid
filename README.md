@@ -130,6 +130,7 @@ allow_rgb = false    # fall back to a regular webcam (much weaker)
 
 [verify]
 threshold = 0.5      # higher = stricter match
+fast_threshold = 0.8 # two frames this similar are enough (faster unlock)
 timeout_ms = 4000
 max_failures = 5     # then wait cooldown_s seconds
 cooldown_s = 30

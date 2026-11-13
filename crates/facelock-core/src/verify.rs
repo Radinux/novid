@@ -13,6 +13,9 @@ pub enum Verdict {
     Reject(&'static str),
 }
 
+/// Strong matches that settle a verification early (see `fast_threshold`).
+const FAST_MATCHES: u32 = 2;
+
 pub struct Verifier<'a> {
     cfg: &'a VerifyConfig,
     profiles: Vec<&'a Profile>,
@@ -79,7 +82,7 @@ impl<'a> Verifier<'a> {
                 self.matches.push((i, sim));
             }
         }
-        if (self.matches.len() as u32) < self.cfg.min_matches {
+        if !self.enough_matches() {
             return None;
         }
         // Profile with the most matching frames wins.
@@ -110,6 +113,14 @@ impl<'a> Verifier<'a> {
         Some(Verdict::Match { profile_id: profile.id.clone(), similarity: sim })
     }
 
+    /// `min_matches` frames, or two clear ones: a lit frame only comes every
+    /// other camera frame, so each one saved is ~130 ms on a 15 fps IR camera.
+    fn enough_matches(&self) -> bool {
+        let n = self.matches.len() as u32;
+        let strong = self.matches.iter().filter(|m| m.1 >= self.cfg.fast_threshold).count() as u32;
+        n >= self.cfg.min_matches || strong >= FAST_MATCHES.min(self.cfg.min_matches)
+    }
+
     /// Verdict when the time budget runs out.
     pub fn finish(&self) -> Verdict {
         if self.profiles.is_empty() {
@@ -129,5 +140,76 @@ impl<'a> Verifier<'a> {
 
     pub fn best_similarity(&self) -> f32 {
         self.best_sim
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::detect::Face;
+    use crate::image::Rect;
+    use crate::pose::Pose;
+    use crate::store::Sample;
+
+    fn profile() -> Profile {
+        let mut e = vec![0.0; 128];
+        e[0] = 1.0;
+        Profile {
+            id: "p".into(),
+            label: String::new(),
+            created: 0,
+            model: "m".into(),
+            eyewear: None,
+            samples: vec![Sample { yaw: 0.0, pitch: 0.0, embedding: e }],
+        }
+    }
+
+    /// Unit embedding whose cosine with the profile sample is `sim`.
+    fn frame(sim: f32) -> (Analysis, Embedding) {
+        let mut e = vec![0.0; 128];
+        e[0] = sim;
+        e[1] = (1.0 - sim * sim).sqrt();
+        let face = Face { bbox: Rect { x: 0.0, y: 0.0, w: 100.0, h: 100.0 }, kps: [[0.0; 2]; 5], score: 1.0 };
+        let features = LivenessFeatures { emitter_gain: Some(100.0), ..Default::default() };
+        (Analysis { face, pose: Pose::default(), features }, e)
+    }
+
+    /// Frames fed before a verdict, and the verdict.
+    fn run(cfg: &VerifyConfig, sims: &[f32]) -> (usize, Option<Verdict>) {
+        let profiles = [profile()];
+        let mut v = Verifier::new(cfg, &profiles, "m");
+        for (i, s) in sims.iter().enumerate() {
+            let (a, e) = frame(*s);
+            assert!(v.wants_embedding(Some(&a)));
+            if let Some(verdict) = v.feed(&a, &e) {
+                return (i + 1, Some(verdict));
+            }
+        }
+        (sims.len(), None)
+    }
+
+    #[test]
+    fn two_clear_frames_are_enough() {
+        let (n, v) = run(&VerifyConfig::default(), &[0.9, 0.88, 0.9]);
+        assert_eq!(n, 2);
+        assert!(matches!(v, Some(Verdict::Match { .. })));
+    }
+
+    #[test]
+    fn borderline_frames_need_min_matches() {
+        let (n, v) = run(&VerifyConfig::default(), &[0.6, 0.9, 0.6, 0.9]);
+        assert_eq!(n, 3);
+        assert!(matches!(v, Some(Verdict::Match { .. })));
+    }
+
+    #[test]
+    fn shortcut_can_be_turned_off() {
+        let cfg = VerifyConfig { fast_threshold: 1.0, ..Default::default() };
+        assert_eq!(run(&cfg, &[0.9, 0.9, 0.9]).0, 3);
+    }
+
+    #[test]
+    fn no_match_below_threshold() {
+        assert_eq!(run(&VerifyConfig::default(), &[0.3, 0.4, 0.2]).1, None);
     }
 }
