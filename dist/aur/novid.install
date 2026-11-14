@@ -1,0 +1,7 @@
+# Remove facelock from /etc/pam.d before the PAM module goes away, so no
+# stack is left pointing to a missing pam_facelock.so.
+pre_remove() {
+  if [ -x /usr/bin/facelockd ]; then
+    /usr/bin/facelockd --disable-pam || true
+  fi
+}

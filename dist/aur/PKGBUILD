@@ -1,0 +1,83 @@
+# Maintainer: Radinux <228412190+Radinux@users.noreply.github.com>
+pkgbase=novid
+pkgname=('novid' 'novid-gtk')
+pkgver=0.1.2
+pkgrel=1
+pkgdesc="Infrared face authentication with liveness detection (sudo, GDM, polkit, keyring)"
+arch=('x86_64')
+url="https://github.com/Radinux/novid"
+license=('GPL-3.0-or-later')
+makedepends=('cargo' 'clang' 'gettext')
+options=('!lto' '!debug')
+_yunet=face_detection_yunet_2026may.onnx
+_sface=face_recognition_sface_2021dec.onnx
+_zoo=https://github.com/opencv/opencv_zoo/raw/main/models
+source=("$pkgbase-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz"
+        "$_zoo/face_detection_yunet/$_yunet"
+        "$_zoo/face_recognition_sface/$_sface")
+noextract=("$_yunet" "$_sface")
+sha256sums=('71b8cbe2c6f98e4669837ea99adc9639608f4b433c325eabdf4ea900ca74c4db'
+            'ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0'
+            '0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79')
+
+prepare() {
+  cd "$pkgbase-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "$pkgbase-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable CARGO_TARGET_DIR=target
+  cargo build --frozen --release -p facelockd -p facelock -p pam-facelock
+
+  for po in gtk/po/*.po; do
+    lang="$(basename "$po" .po)"
+    mkdir -p "locale/$lang/LC_MESSAGES"
+    msgfmt -o "locale/$lang/LC_MESSAGES/facelock-gtk.mo" "$po"
+  done
+}
+
+check() {
+  cd "$pkgbase-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable CARGO_TARGET_DIR=target
+  cargo test --frozen --release -p facelock-core -p facelockd
+}
+
+package_novid() {
+  depends=('onnxruntime' 'dbus' 'pam' 'polkit' 'systemd' 'libxcrypt' 'gcc-libs' 'glibc')
+  optdepends=('novid-gtk: graphical face management')
+  provides=('facelock')
+  conflicts=('facelock')
+  backup=('etc/facelock/config.toml')
+  install=novid.install
+
+  cd "$pkgbase-$pkgver"
+  local t=target/release
+  install -Dm755 "$t/facelockd" "$pkgdir/usr/bin/facelockd"
+  install -Dm755 "$t/facelock" "$pkgdir/usr/bin/facelock"
+  install -Dm755 "$t/libpam_facelock.so" "$pkgdir/usr/lib/security/pam_facelock.so"
+  install -Dm644 dist/systemd/facelockd.service "$pkgdir/usr/lib/systemd/system/facelockd.service"
+  install -Dm644 dist/dbus/org.facelock.Daemon1.service "$pkgdir/usr/share/dbus-1/system-services/org.facelock.Daemon1.service"
+  install -Dm644 dist/dbus/org.facelock.Daemon1.conf "$pkgdir/usr/share/dbus-1/system.d/org.facelock.Daemon1.conf"
+  install -Dm644 dist/polkit/org.facelock.policy "$pkgdir/usr/share/polkit-1/actions/org.facelock.policy"
+  install -Dm644 dist/config.toml "$pkgdir/etc/facelock/config.toml"
+  install -Dm644 -t "$pkgdir/usr/share/facelock/models" "$srcdir/$_yunet" "$srcdir/$_sface"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
+
+package_novid-gtk() {
+  pkgdesc="GTK app to manage NovID face profiles"
+  arch=('any')
+  depends=('novid' 'python' 'python-gobject' 'gtk4' 'libadwaita')
+  provides=('facelock-gtk')
+  conflicts=('facelock-gtk')
+
+  cd "$pkgbase-$pkgver"
+  install -Dm755 gtk/facelock-gtk "$pkgdir/usr/bin/facelock-gtk"
+  install -Dm644 -t "$pkgdir/usr/share/facelock-gtk/facelock_gtk" gtk/facelock_gtk/*.py
+  install -Dm644 gtk/data/org.facelock.Facelock.desktop "$pkgdir/usr/share/applications/org.facelock.Facelock.desktop"
+  install -Dm644 gtk/data/icons/org.facelock.Facelock.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.facelock.Facelock.svg"
+  install -Dm644 gtk/data/icons/facelock-keyring-symbolic.svg "$pkgdir/usr/share/icons/hicolor/symbolic/apps/facelock-keyring-symbolic.svg"
+  cp -r locale "$pkgdir/usr/share/locale"
+}
