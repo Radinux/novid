@@ -18,8 +18,8 @@ use log::{error, info, warn};
 use tokio::sync::{mpsc, oneshot};
 
 const ENROLL_TIMEOUT: Duration = Duration::from_secs(120);
+/// Preview width; the height follows the camera's aspect ratio.
 const PREVIEW_W: usize = 320;
-const PREVIEW_H: usize = 180;
 
 pub enum Job {
     Verify { user: String, profiles: Vec<Profile>, reply: oneshot::Sender<Verdict> },
@@ -173,11 +173,14 @@ fn verify(engine: &mut Engine, cfg: &Config, shared: &SharedCamera, profiles: &[
 }
 
 fn frame_event(pair: &FramePair, a: Option<&Analysis>) -> Event {
-    let pixels = match &pair.color {
-        Some(c) => c.resize(PREVIEW_W, PREVIEW_H).px,
-        None => pair.lit.resize(PREVIEW_W, PREVIEW_H).px,
-    };
+    // One scale for both axes, so the overlay stays on the face whatever
+    // the camera's aspect ratio (16:9, 4:3…).
     let k = PREVIEW_W as f64 / pair.lit.w as f64;
+    let ph = ((pair.lit.h as f64 * k).round() as usize).max(1);
+    let pixels = match &pair.color {
+        Some(c) => c.resize(PREVIEW_W, ph).px,
+        None => pair.lit.resize(PREVIEW_W, ph).px,
+    };
     let face = a
         .map(|a| {
             let b = a.face.bbox;
@@ -189,7 +192,7 @@ fn frame_event(pair: &FramePair, a: Option<&Analysis>) -> Event {
             v
         })
         .unwrap_or_default();
-    Event::Frame { width: PREVIEW_W as u32, height: PREVIEW_H as u32, pixels, face }
+    Event::Frame { width: PREVIEW_W as u32, height: ph as u32, pixels, face }
 }
 
 fn enroll(
