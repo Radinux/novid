@@ -144,6 +144,10 @@ impl Bgr {
         Self { w, h, px }
     }
 
+    pub fn resize(&self, w: usize, h: usize) -> Bgr {
+        self.crop_resize((0, 0, self.w - 1, self.h - 1), w, h)
+    }
+
     /// Bilinear resize of the pixel box `x0..=x1, y0..=y1` to `w`×`h`
     /// (pixel-centre sampling, like OpenCV's INTER_LINEAR).
     pub fn crop_resize(&self, (x0, y0, x1, y1): (usize, usize, usize, usize), w: usize, h: usize) -> Bgr {

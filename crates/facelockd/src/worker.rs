@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use facelock_core::camera::{self, CameraInfo, CameraKind};
+use facelock_core::camera::{self, CameraInfo, CameraKind, FramePair};
 use facelock_core::config::Config;
 use facelock_core::engine::{Analysis, Engine};
 use facelock_core::enroll::{EnrollEvent, EnrollOutcome, Enroller};
@@ -28,7 +28,9 @@ pub enum Job {
 }
 
 pub enum Event {
-    /// Downscaled lit frame; `face` = bbox (x, y, w, h) then 5 landmarks, in frame pixels.
+    /// Downscaled lit frame, greyscale (1 byte per pixel) or, from colour
+    /// webcams, BGR (3 bytes); `face` = bbox (x, y, w, h) then 5 landmarks,
+    /// in preview pixels.
     Frame { width: u32, height: u32, pixels: Vec<u8>, face: Vec<f64> },
     Enroll(EnrollEvent),
     /// `real_score` is -1 when not measured (IR camera).
@@ -170,9 +172,12 @@ fn verify(engine: &mut Engine, cfg: &Config, shared: &SharedCamera, profiles: &[
     verdict
 }
 
-fn frame_event(lit: &facelock_core::image::Gray, a: Option<&Analysis>) -> Event {
-    let small = lit.resize(PREVIEW_W, PREVIEW_H);
-    let k = PREVIEW_W as f64 / lit.w as f64;
+fn frame_event(pair: &FramePair, a: Option<&Analysis>) -> Event {
+    let pixels = match &pair.color {
+        Some(c) => c.resize(PREVIEW_W, PREVIEW_H).px,
+        None => pair.lit.resize(PREVIEW_W, PREVIEW_H).px,
+    };
+    let k = PREVIEW_W as f64 / pair.lit.w as f64;
     let face = a
         .map(|a| {
             let b = a.face.bbox;
@@ -184,7 +189,7 @@ fn frame_event(lit: &facelock_core::image::Gray, a: Option<&Analysis>) -> Event 
             v
         })
         .unwrap_or_default();
-    Event::Frame { width: PREVIEW_W as u32, height: PREVIEW_H as u32, pixels: small.px, face }
+    Event::Frame { width: PREVIEW_W as u32, height: PREVIEW_H as u32, pixels, face }
 }
 
 fn enroll(
@@ -206,7 +211,7 @@ fn enroll(
         }
         let pair = feed.next(Duration::from_secs(3))?;
         let a = engine.analyze(&pair)?;
-        let _ = events.send(frame_event(&pair.lit, a.as_ref()));
+        let _ = events.send(frame_event(&pair, a.as_ref()));
         let evs = en.feed(Instant::now(), a.as_ref(), &mut || {
             engine.embed(&pair, &a.as_ref().expect("capture implies a face").face)
         })?;
@@ -231,7 +236,7 @@ fn preview(
     while !cancel.load(Ordering::Relaxed) {
         let pair = feed.next(Duration::from_secs(3))?;
         let a = engine.analyze(&pair)?;
-        let _ = events.send(frame_event(&pair.lit, a.as_ref()));
+        let _ = events.send(frame_event(&pair, a.as_ref()));
         let Some(a) = a else { continue };
         let emb = engine.embed(&pair, &a.face)?;
         let sim = usable

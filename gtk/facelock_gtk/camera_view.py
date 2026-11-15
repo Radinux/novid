@@ -95,7 +95,11 @@ class CameraView(Gtk.Widget):
         self.queue_draw()
 
     def set_frame(self, w, h, pixels, face):
-        self.texture = Gdk.MemoryTexture.new(w, h, Gdk.MemoryFormat.G8, pixels, w)
+        # Greyscale from IR cameras, BGR from colour webcams.
+        if pixels.get_size() == w * h * 3:
+            self.texture = Gdk.MemoryTexture.new(w, h, Gdk.MemoryFormat.B8G8R8, pixels, w * 3)
+        else:
+            self.texture = Gdk.MemoryTexture.new(w, h, Gdk.MemoryFormat.G8, pixels, w)
         self.tex_size = (w, h)
         self.face = list(face)
         if len(face) >= 4:
