@@ -128,3 +128,58 @@ impl Gray {
         Gray { w: self.w, h: self.h, px }
     }
 }
+
+/// 8-bit colour image, BGR byte order (what MiniFASNet was trained on).
+/// Only colour webcams produce one.
+#[derive(Clone, Debug)]
+pub struct Bgr {
+    pub w: usize,
+    pub h: usize,
+    pub px: Vec<u8>,
+}
+
+impl Bgr {
+    pub fn from_raw(w: usize, h: usize, px: Vec<u8>) -> Self {
+        assert_eq!(px.len(), w * h * 3, "buffer size mismatch");
+        Self { w, h, px }
+    }
+
+    /// Bilinear resize of the pixel box `x0..=x1, y0..=y1` to `w`×`h`
+    /// (pixel-centre sampling, like OpenCV's INTER_LINEAR).
+    pub fn crop_resize(&self, (x0, y0, x1, y1): (usize, usize, usize, usize), w: usize, h: usize) -> Bgr {
+        let x1 = x1.min(self.w - 1).max(x0);
+        let y1 = y1.min(self.h - 1).max(y0);
+        let sx = (x1 - x0 + 1) as f32 / w as f32;
+        let sy = (y1 - y0 + 1) as f32 / h as f32;
+        let mut px = Vec::with_capacity(w * h * 3);
+        for y in 0..h {
+            let fy = ((y as f32 + 0.5) * sy - 0.5).clamp(0.0, (y1 - y0) as f32) + y0 as f32;
+            let (ya, fy) = (fy.floor() as usize, fy.fract());
+            let yb = (ya + 1).min(y1);
+            for x in 0..w {
+                let fx = ((x as f32 + 0.5) * sx - 0.5).clamp(0.0, (x1 - x0) as f32) + x0 as f32;
+                let (xa, fx) = (fx.floor() as usize, fx.fract());
+                let xb = (xa + 1).min(x1);
+                for c in 0..3 {
+                    let at = |x: usize, y: usize| self.px[(y * self.w + x) * 3 + c] as f32;
+                    let top = at(xa, ya) + (at(xb, ya) - at(xa, ya)) * fx;
+                    let bot = at(xa, yb) + (at(xb, yb) - at(xa, yb)) * fx;
+                    px.push((top + (bot - top) * fy).round() as u8);
+                }
+            }
+        }
+        Bgr { w, h, px }
+    }
+}
+
+/// One YUYV (YUY2) row to BGR, BT.601 limited range as webcams send it.
+pub fn yuyv_to_bgr(row: &[u8], out: &mut Vec<u8>) {
+    for q in row.as_chunks::<4>().0 {
+        let (u, v) = (q[1] as i32 - 128, q[3] as i32 - 128);
+        for y in [q[0], q[2]] {
+            let c = 298 * (y as i32 - 16);
+            let px = |v: i32| ((v + 128) >> 8).clamp(0, 255) as u8;
+            out.extend([px(c + 516 * u), px(c - 100 * u - 208 * v), px(c + 409 * v)]);
+        }
+    }
+}

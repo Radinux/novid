@@ -26,7 +26,7 @@ fn print_line(a: &Analysis, sim: Option<f32>, ms: u128) {
     let f = &a.features;
     let opt = |v: Option<f32>, p: usize| v.map_or("-".into(), |x| format!("{x:.p$}"));
     println!(
-        "sim {:>5}  {ms:>3}ms  face {:.2} iod {:4.1} yaw {:+5.1} pitch {:+5.1} roll {:+5.1} | gain {:>5} glint {:>4} area {:>4} off {:>4} | lit {:5.1} sharp {:4.1}",
+        "sim {:>5}  {ms:>3}ms  face {:.2} iod {:4.1} yaw {:+5.1} pitch {:+5.1} roll {:+5.1} | gain {:>5} glint {:>4} area {:>4} off {:>4} | lit {:5.1} sharp {:4.1} | réel {:>4}",
         opt(sim, 3),
         a.face.score,
         a.face.iod(),
@@ -38,7 +38,8 @@ fn print_line(a: &Analysis, sim: Option<f32>, ms: u128) {
         opt(f.glint_area, 1),
         opt(f.glint_offset, 2),
         f.lit_level,
-        f.sharpness
+        f.sharpness,
+        opt(a.real_score, 2)
     );
 }
 
@@ -111,7 +112,7 @@ pub fn replay(cfg: &Config, user: &str, dir: &Path) -> Result<()> {
     for lit_path in lits {
         let dark_path = PathBuf::from(lit_path.to_string_lossy().replace("_lit.png", "_dark.png"));
         let dark = if dark_path.exists() { Some(load_gray(&dark_path)?) } else { None };
-        let pair = FramePair { lit: load_gray(&lit_path)?, dark, at: Instant::now() };
+        let pair = FramePair { lit: load_gray(&lit_path)?, dark, color: None, at: Instant::now() };
         obs.extend(process(&mut engine, &profs, &pair, Instant::now())?);
     }
     print_eyewear(&obs);

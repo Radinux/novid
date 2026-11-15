@@ -17,6 +17,8 @@ def reason_text(code):
         "no-match": _("Face not recognized"),
         "no-ir-strobe": _("The IR emitter is not blinking"),
         "low-ir": _("Too little infrared reflected (screen? too far?)"),
+        "spoof": _("Looks like a photo or a screen"),
+        "no-antispoof": _("Photo check models missing for the colour webcam"),
         "eyewear-mismatch": _("Eye reflections don't match the enrolled face"),
         "eyewear-undecided": _("Look straight at the screen"),
         "cooldown": _("Too many failures, try again later"),
@@ -59,6 +61,9 @@ class TestPage(Adw.NavigationPage):
         group.add(self.sim_row)
 
         self.ir_row = self._value_row(group, _("Infrared Reflection"), _("Light from the emitter bouncing off your face"))
+        # Colour webcams only, instead of the IR row.
+        self.real_row = self._value_row(group, _("Live Face"), _("Chance that this is not a photo or a screen"))
+        self.real_row.set_visible(False)
         self.pose_row = self._value_row(group, _("Head Position"), _("Left/right and up/down angle"))
         self.eyes_row = self._value_row(group, _("Eye Reflections"), _("What the emitter's glints suggest"))
 
@@ -121,11 +126,16 @@ class TestPage(Adw.NavigationPage):
             self.sim_label.set_label("—")
             self.sim_bar.set_value(0)
 
-    def _on_stats(self, _d, sim, gain, yaw, pitch, eyewear):
+    def _on_stats(self, _d, sim, gain, real, yaw, pitch, eyewear):
         sim = max(sim, 0.0)
         self.sim_bar.set_value(min(sim, 1.0))
         self.sim_label.set_label(f"{sim:.2f}")
+        colour = real >= 0
+        self.ir_row.set_visible(not colour)
+        self.eyes_row.set_visible(not colour)
+        self.real_row.set_visible(colour)
         self.ir_row.value.set_label(f"{gain:.0f} / 255")
+        self.real_row.value.set_label(f"{real * 100:.0f} %" if colour else "")
         # yaw > 0: the user turned to their left.
         side = _("left") if yaw > 3 else _("right") if yaw < -3 else _("center")
         self.pose_row.value.set_label(f"{abs(yaw):.0f}° {side} · {pitch:+.0f}°")

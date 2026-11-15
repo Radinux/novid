@@ -31,7 +31,8 @@ pub enum Event {
     /// Downscaled lit frame; `face` = bbox (x, y, w, h) then 5 landmarks, in frame pixels.
     Frame { width: u32, height: u32, pixels: Vec<u8>, face: Vec<f64> },
     Enroll(EnrollEvent),
-    Stats { similarity: f64, emitter_gain: f64, yaw: f64, pitch: f64, eyewear: &'static str },
+    /// `real_score` is -1 when not measured (IR camera).
+    Stats { similarity: f64, emitter_gain: f64, real_score: f64, yaw: f64, pitch: f64, eyewear: &'static str },
 }
 
 /// Camera in use, shared with the D-Bus side (properties). `None` if no
@@ -50,7 +51,7 @@ fn detect(cfg: &Config, shared: &SharedCamera) -> Option<CameraInfo> {
                 info.path().display()
             );
             if info.kind == CameraKind::Rgb {
-                warn!("colour camera in use: no IR liveness, photos may pass; keyring release disabled");
+                warn!("colour camera in use: no IR liveness, only the MiniFASNet photo/screen check; keyring release disabled");
             }
             *shared.lock().unwrap() = Some(info.clone());
             Some(info)
@@ -128,6 +129,10 @@ fn verify(engine: &mut Engine, cfg: &Config, shared: &SharedCamera, profiles: &[
     if info.kind == CameraKind::Rgb {
         vcfg.require_strobe = false;
         vcfg.eyewear_check = false;
+        if vcfg.rgb_antispoof && !engine.has_antispoof() {
+            error!("colour camera without the MiniFASNet models: refusing (set rgb_antispoof = false to allow)");
+            return Verdict::Reject("no-antispoof");
+        }
     }
     let mut v = Verifier::new(&vcfg, profiles, &engine.model_id);
     if !v.has_profiles() {
@@ -247,6 +252,7 @@ fn preview(
         let _ = events.send(Event::Stats {
             similarity: sim as f64,
             emitter_gain: a.features.emitter_gain.unwrap_or(0.0) as f64,
+            real_score: a.real_score.map_or(-1.0, f64::from),
             yaw: a.pose.yaw as f64,
             pitch: a.pose.pitch as f64,
             eyewear,

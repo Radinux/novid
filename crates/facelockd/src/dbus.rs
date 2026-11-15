@@ -270,8 +270,8 @@ impl Daemon {
 async fn emit(em: &SignalEmitter<'_>, ev: Event) -> zbus::Result<()> {
     match ev {
         Event::Frame { width, height, pixels, face } => Daemon::preview_frame(em, width, height, &pixels, &face).await,
-        Event::Stats { similarity, emitter_gain, yaw, pitch, eyewear } => {
-            Daemon::preview_stats(em, similarity, emitter_gain, yaw, pitch, eyewear).await
+        Event::Stats { similarity, emitter_gain, real_score, yaw, pitch, eyewear } => {
+            Daemon::preview_stats(em, similarity, emitter_gain, real_score, yaw, pitch, eyewear).await
         }
         Event::Enroll(e) => match e {
             EnrollEvent::Calibrating { progress } => Daemon::enroll_calibrating(em, progress as f64).await,
@@ -686,6 +686,7 @@ impl Daemon {
         em: &SignalEmitter<'_>,
         similarity: f64,
         emitter_gain: f64,
+        real_score: f64,
         yaw: f64,
         pitch: f64,
         eyewear: &str,

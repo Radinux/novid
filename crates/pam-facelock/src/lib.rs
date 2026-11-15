@@ -167,6 +167,7 @@ fn reason_text(fr: bool, code: &str) -> &'static str {
         "eyewear-mismatch" => tr(fr, "eye reflections don't match the enrolled face", "reflets incohérents avec le visage enregistré"),
         "eyewear-undecided" => tr(fr, "look straight at the screen", "regarde l'écran bien en face"),
         "low-ir" | "no-ir-strobe" => tr(fr, "IR check failed", "contrôle infrarouge échoué"),
+        "spoof" => tr(fr, "looks like a photo or a screen", "ressemble à une photo ou un écran"),
         "cooldown" => tr(fr, "too many failures, try again later", "trop d'échecs, réessaie plus tard"),
         _ => tr(fr, "face authentication failed", "échec de l'authentification faciale"),
     }

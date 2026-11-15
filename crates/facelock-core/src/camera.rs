@@ -5,8 +5,9 @@
 //! pair consecutive frames into (lit, dark); their difference isolates light
 //! from the emitter, which is the basis of the liveness checks.
 //!
-//! Plain RGB webcams are supported as an explicit, weaker fallback: only the
-//! luma channel is used and there is never a dark frame.
+//! Plain RGB webcams are supported as an explicit, weaker fallback: luma
+//! feeds detection and recognition, the colour frame feeds the MiniFASNet
+//! photo/screen check, and there is never a dark frame.
 
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
@@ -20,7 +21,7 @@ use v4l::video::Capture;
 use v4l::video::capture::Parameters;
 use v4l::{Device, FourCC, Format};
 
-use crate::image::Gray;
+use crate::image::{Bgr, Gray, yuyv_to_bgr};
 
 /// Lit frame must be at least this much brighter than its neighbour to be
 /// considered an emitter frame.
@@ -32,6 +33,8 @@ pub struct FramePair {
     pub lit: Gray,
     /// `None` when the emitter does not strobe, or on RGB cameras.
     pub dark: Option<Gray>,
+    /// The same frame in colour, from colour webcams only.
+    pub color: Option<Bgr>,
     pub at: Instant,
 }
 
@@ -278,35 +281,39 @@ impl Camera {
         (self.w, self.h)
     }
 
-    fn grab(&mut self) -> Result<Gray> {
+    fn grab(&mut self) -> Result<(Gray, Option<Bgr>)> {
         let (buf, _meta) = self.stream.next().context("reading frame")?;
         if buf.len() < self.stride * (self.h - 1) + self.w * if self.yuyv { 2 } else { 1 } {
             bail!("short frame: {} bytes", buf.len());
         }
         let mut px = Vec::with_capacity(self.w * self.h);
+        let mut bgr = Vec::with_capacity(if self.yuyv { self.w * self.h * 3 } else { 0 });
         for y in 0..self.h {
             let row = &buf[y * self.stride..];
             if self.yuyv {
                 // Y0 U Y1 V: luma is every other byte.
                 px.extend(row[..self.w * 2].iter().step_by(2));
+                yuyv_to_bgr(&row[..self.w * 2], &mut bgr);
             } else {
                 px.extend_from_slice(&row[..self.w]);
             }
         }
-        Ok(Gray::from_raw(self.w, self.h, px))
+        let color = self.yuyv.then(|| Bgr::from_raw(self.w, self.h, bgr));
+        Ok((Gray::from_raw(self.w, self.h, px), color))
     }
 
     /// Returns the next (lit, dark) pair. Blocks for at most `timeout`.
     pub fn next_pair(&mut self, timeout: Duration) -> Result<FramePair> {
         if self.kind == CameraKind::Rgb {
-            return Ok(FramePair { lit: self.grab()?, dark: None, at: Instant::now() });
+            let (lit, color) = self.grab()?;
+            return Ok(FramePair { lit, dark: None, color, at: Instant::now() });
         }
         let deadline = Instant::now() + timeout;
         loop {
             if Instant::now() > deadline {
                 bail!("timed out waiting for IR frames");
             }
-            let cur = self.grab()?;
+            let (cur, _) = self.grab()?;
             let m = cur.mean();
             let Some((prev, pm)) = self.prev.take() else {
                 self.prev = Some((cur, m));
@@ -314,11 +321,11 @@ impl Camera {
             };
             if m > pm * STROBE_RATIO {
                 self.non_strobe_streak = 0;
-                return Ok(FramePair { lit: cur, dark: Some(prev), at: Instant::now() });
+                return Ok(FramePair { lit: cur, dark: Some(prev), color: None, at: Instant::now() });
             }
             if pm > m * STROBE_RATIO {
                 self.non_strobe_streak = 0;
-                return Ok(FramePair { lit: prev, dark: Some(cur), at: Instant::now() });
+                return Ok(FramePair { lit: prev, dark: Some(cur), color: None, at: Instant::now() });
             }
             self.non_strobe_streak += 1;
             self.prev = Some((cur, m));
@@ -326,7 +333,7 @@ impl Camera {
                 // Emitter isn't strobing (or is off). Hand out single frames so
                 // recognition still works; liveness will mark it as weak.
                 let (f, _) = self.prev.take().unwrap();
-                return Ok(FramePair { lit: f, dark: None, at: Instant::now() });
+                return Ok(FramePair { lit: f, dark: None, color: None, at: Instant::now() });
             }
         }
     }

@@ -1,4 +1,5 @@
 pub mod align;
+pub mod antispoof;
 pub mod camera;
 pub mod config;
 pub mod detect;

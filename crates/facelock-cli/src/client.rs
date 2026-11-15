@@ -34,6 +34,8 @@ pub fn reason_fr(code: &str) -> &str {
         "no-match" => "visage non reconnu",
         "no-ir-strobe" => "l'émetteur IR ne clignote pas",
         "low-ir" => "trop peu de lumière IR réfléchie (écran ? trop loin ?)",
+        "spoof" => "ressemble à une photo ou un écran",
+        "no-antispoof" => "webcam couleur sans les modèles MiniFASNet",
         "eyewear-mismatch" => "reflets incohérents avec le profil (lunettes ?)",
         "eyewear-undecided" => "regarde l'écran bien en face",
         "cooldown" => "trop d'échecs, réessaie dans un moment",

@@ -30,7 +30,8 @@ case "$ARCH" in
   arm64) ort_arch=aarch64; ort_sha="$ORT_SHA_arm64" ;;
   *) echo "no ONNX Runtime build for $ARCH" >&2; exit 1 ;;
 esac
-for m in face_detection_yunet_2026may.onnx face_recognition_sface_2021dec.onnx; do
+MODELS="face_detection_yunet_2026may.onnx face_recognition_sface_2021dec.onnx MiniFASNetV2.onnx MiniFASNetV1SE.onnx"
+for m in $MODELS; do
   [ -f "models/$m" ] || { echo "models/$m missing: run dist/fetch-models.sh" >&2; exit 1; }
 done
 
@@ -60,7 +61,7 @@ install -Dm644 dist/dbus/org.facelock.Daemon1.service "$p/usr/share/dbus-1/syste
 install -Dm644 dist/dbus/org.facelock.Daemon1.conf "$p/usr/share/dbus-1/system.d/org.facelock.Daemon1.conf"
 install -Dm644 dist/polkit/org.facelock.policy "$p/usr/share/polkit-1/actions/org.facelock.policy"
 install -Dm644 dist/config.toml "$p/etc/facelock/config.toml"
-install -Dm644 -t "$p/usr/share/facelock/models" models/face_detection_yunet_2026may.onnx models/face_recognition_sface_2021dec.onnx
+for m in $MODELS; do install -Dm644 -t "$p/usr/share/facelock/models" "models/$m"; done
 install -Dm644 "$WORK/$ort/lib/libonnxruntime.so.$ORT_VERSION" "$p/usr/lib/facelock/libonnxruntime.so.$ORT_VERSION"
 ln -s "libonnxruntime.so.$ORT_VERSION" "$p/usr/lib/facelock/libonnxruntime.so"
 install -Dm644 "$WORK/$ort/LICENSE" "$p/usr/share/doc/facelock/LICENSE.onnxruntime"

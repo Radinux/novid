@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
+use crate::antispoof::SpoofModel;
 use crate::camera::CameraConfig;
 use crate::embed::Normalize;
 
@@ -27,6 +28,8 @@ pub struct ModelConfig {
     pub detector: String,
     pub recognizer: String,
     pub normalize: Normalize,
+    /// MiniFASNet photo/screen check, used with colour webcams only.
+    pub antispoof: Vec<SpoofModel>,
 }
 
 impl Default for ModelConfig {
@@ -36,6 +39,10 @@ impl Default for ModelConfig {
             detector: "face_detection_yunet_2026may.onnx".into(),
             recognizer: "face_recognition_sface_2021dec.onnx".into(),
             normalize: Normalize::RAW,
+            antispoof: vec![
+                SpoofModel { file: "MiniFASNetV2.onnx".into(), scale: 2.7 },
+                SpoofModel { file: "MiniFASNetV1SE.onnx".into(), scale: 4.0 },
+            ],
         }
     }
 }
@@ -57,6 +64,11 @@ pub struct VerifyConfig {
     pub min_emitter_gain: f32,
     /// Eye reflections must agree with the enrolled profile (glasses or not).
     pub eyewear_check: bool,
+    /// Colour webcams only: refuse faces that MiniFASNet takes for a photo
+    /// or a screen. Without it, a good photo may unlock.
+    pub rgb_antispoof: bool,
+    /// MiniFASNet's probability (0..1) that the face is live, per frame.
+    pub min_real_score: f32,
     /// Consecutive failures before a cooldown, and its length.
     pub max_failures: u32,
     pub cooldown_s: u64,
@@ -73,6 +85,8 @@ impl Default for VerifyConfig {
             min_emitter_gain: 30.0,
             // Experimental: the reflection classifier is not reliable yet.
             eyewear_check: false,
+            rgb_antispoof: true,
+            min_real_score: 0.6,
             max_failures: 5,
             cooldown_s: 30,
         }

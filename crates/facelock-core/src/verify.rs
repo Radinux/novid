@@ -26,6 +26,7 @@ pub struct Verifier<'a> {
     faces: u32,
     no_strobe: u32,
     low_ir: u32,
+    spoof: u32,
     best_sim: f32,
 }
 
@@ -41,6 +42,7 @@ impl<'a> Verifier<'a> {
             faces: 0,
             no_strobe: 0,
             low_ir: 0,
+            spoof: 0,
             best_sim: -1.0,
         }
     }
@@ -54,6 +56,13 @@ impl<'a> Verifier<'a> {
         self.frames += 1;
         let Some(a) = a else { return false };
         self.faces += 1;
+        if self.cfg.rgb_antispoof
+            && let Some(s) = a.real_score
+            && s < self.cfg.min_real_score
+        {
+            self.spoof += 1;
+            return false;
+        }
         match a.features.emitter_gain {
             None if self.cfg.require_strobe => {
                 self.no_strobe += 1;
@@ -127,6 +136,8 @@ impl<'a> Verifier<'a> {
             Verdict::Reject("no-profile")
         } else if self.faces == 0 {
             Verdict::Reject("no-face")
+        } else if self.spoof * 2 > self.faces {
+            Verdict::Reject("spoof")
         } else if self.no_strobe * 2 > self.faces {
             Verdict::Reject("no-ir-strobe")
         } else if self.low_ir * 2 > self.faces {
@@ -171,7 +182,7 @@ mod tests {
         e[1] = (1.0 - sim * sim).sqrt();
         let face = Face { bbox: Rect { x: 0.0, y: 0.0, w: 100.0, h: 100.0 }, kps: [[0.0; 2]; 5], score: 1.0 };
         let features = LivenessFeatures { emitter_gain: Some(100.0), ..Default::default() };
-        (Analysis { face, pose: Pose::default(), features }, e)
+        (Analysis { face, pose: Pose::default(), features, real_score: None }, e)
     }
 
     /// Frames fed before a verdict, and the verdict.
@@ -186,6 +197,37 @@ mod tests {
             }
         }
         (sims.len(), None)
+    }
+
+    #[test]
+    fn colour_photo_is_refused() {
+        let cfg = VerifyConfig { require_strobe: false, ..VerifyConfig::default() };
+        let profiles = [profile()];
+        let mut v = Verifier::new(&cfg, &profiles, "m");
+        for score in [0.1, 0.2, 0.9, 0.1] {
+            let (mut a, e) = frame(0.95);
+            a.features.emitter_gain = None;
+            a.real_score = Some(score);
+            if v.wants_embedding(Some(&a)) {
+                // A single frame taken for live is not enough to match.
+                assert_eq!(v.feed(&a, &e), None);
+            }
+        }
+        assert_eq!(v.finish(), Verdict::Reject("spoof"));
+    }
+
+    #[test]
+    fn colour_live_face_matches() {
+        let cfg = VerifyConfig { require_strobe: false, ..VerifyConfig::default() };
+        let profiles = [profile()];
+        let mut v = Verifier::new(&cfg, &profiles, "m");
+        let (mut a, e) = frame(0.9);
+        a.features.emitter_gain = None;
+        a.real_score = Some(0.95);
+        assert!(v.wants_embedding(Some(&a)));
+        assert_eq!(v.feed(&a, &e), None);
+        assert!(v.wants_embedding(Some(&a)));
+        assert!(matches!(v.feed(&a, &e), Some(Verdict::Match { .. })));
     }
 
     #[test]

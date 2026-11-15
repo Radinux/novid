@@ -4,8 +4,9 @@
 # "auto" finds the IR camera (greyscale frames, strobing emitter). Or give a
 # path, preferably a stable one from /dev/v4l/by-path/.
 device = "auto"
-# Allow a regular colour webcam when there is no IR camera. Much weaker:
-# no IR liveness, a good photo may pass, the keyring is never unlocked.
+# Allow a regular colour webcam when there is no IR camera. Weaker: no IR
+# liveness, only a learned photo/screen check (MiniFASNet, see
+# rgb_antispoof); the keyring is never unlocked.
 allow_rgb = false
 width = 640
 height = 360
@@ -25,5 +26,9 @@ min_emitter_gain = 30.0
 # Experimental: eye reflections must agree with the enrolled profile
 # (glasses or not). Not reliable yet, off by default.
 eyewear_check = false
+# Colour webcams only: refuse faces that MiniFASNet takes for a photo or a
+# screen, i.e. whose live-face probability (0..1) is below min_real_score.
+rgb_antispoof = true
+min_real_score = 0.6
 max_failures = 5
 cooldown_s = 30

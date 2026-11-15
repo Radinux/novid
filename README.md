@@ -25,6 +25,7 @@ and optionally your GNOME keyring too.
 | | |
 | --- | --- |
 | 🔦 **IR liveness** | Works with Windows Hello–style infrared cameras. The IR emitter must strobe and light your face, so photos and screens are refused. |
+| 📷 **Webcam fallback** *(opt-in)* | Without an IR camera, a regular webcam can be used, with the MiniFASNet photo/screen check. |
 | 🔑 **Never locks you out** | When the face path is unavailable (no camera, lid closed, SSH session, daemon down), PAM falls back to your password. |
 | 🔐 **Keyring unlock** *(opt-in)* | Your login password is sealed with the TPM (`systemd-creds`) and handed to `pam_gnome_keyring` only after a face match at GDM login. |
 | 🖥️ **GTK app** | Guided enrollment, a live recognition test, and one switch per place the face is used. |
@@ -83,8 +84,9 @@ Run it as your normal user; it asks for sudo when needed.
   rustup if the packaged version is too old, then builds the `.deb` packages
   (`dist/debian/build-deb.sh`) and installs them with `apt`.
 
-The ONNX models (YuNet, SFace) are downloaded from
-[OpenCV Zoo](https://github.com/opencv/opencv_zoo) and checked by SHA-256.
+The ONNX models are downloaded and checked by SHA-256: YuNet and SFace from
+[OpenCV Zoo](https://github.com/opencv/opencv_zoo), MiniFASNet from
+[face-anti-spoofing](https://github.com/yakhyo/face-anti-spoofing).
 
 > [!NOTE]
 > Installing doesn't turn face authentication on anywhere. Open **NovID** to
@@ -126,7 +128,7 @@ most likely to change:
 ```toml
 [camera]
 device = "auto"      # or a stable path from /dev/v4l/by-path/
-allow_rgb = false    # fall back to a regular webcam (much weaker)
+allow_rgb = false    # fall back to a regular webcam (weaker, see below)
 
 [verify]
 threshold = 0.5      # higher = stricter match
@@ -134,6 +136,7 @@ fast_threshold = 0.8 # two frames this similar are enough (faster unlock)
 timeout_ms = 4000
 max_failures = 5     # then wait cooldown_s seconds
 cooldown_s = 30
+min_real_score = 0.6 # colour webcams: photo/screen check (MiniFASNet)
 ```
 
 ## Security notes
@@ -145,8 +148,10 @@ cooldown_s = 30
 
 - With the keyring option, root on the running machine can unseal your login
   password. The sealed file is useless on another machine or boot chain.
-- Regular (RGB) webcams are refused unless you allow them; they offer no
-  liveness check and never unlock the keyring.
+- Regular (RGB) webcams are refused unless you allow them. They have no IR
+  liveness: only [MiniFASNet](https://github.com/minivision-ai/Silent-Face-Anti-Spoofing),
+  a learned check that refuses most photos and screens, stands in for it.
+  They never unlock the keyring.
 
 ## Project layout
 
@@ -154,7 +159,7 @@ The packages, commands and services keep the technical name `facelock`.
 
 | Path | What it is |
 | --- | --- |
-| `crates/facelock-core` | Camera capture, YuNet face detection, SFace embeddings, head pose, IR liveness, enrollment and verification |
+| `crates/facelock-core` | Camera capture, YuNet face detection, SFace embeddings, head pose, IR liveness, MiniFASNet photo check, enrollment and verification |
 | `crates/facelockd` | System D-Bus service (polkit-guarded); manages the PAM files and the sealed keyring secret |
 | `crates/pam-facelock` | `pam_facelock.so` |
 | `crates/facelock-cli` | `facelock` command-line client |
@@ -164,4 +169,4 @@ The packages, commands and services keep the technical name `facelock`.
 ## License
 
 GPL-3.0-or-later. The ONNX models keep their own licenses: YuNet is MIT,
-SFace is Apache-2.0.
+SFace and MiniFASNet are Apache-2.0.

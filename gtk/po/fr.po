@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: facelock-gtk 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 15:38+0100\n"
+"POT-Creation-Date: 2026-11-15 01:09+0100\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: facelock_gtk/enroll.py:11 facelock_gtk/enroll.py:147
-#: facelock_gtk/tester.py:21
+#: facelock_gtk/tester.py:23
 msgid "Look straight at the screen"
 msgstr "Regarde l'écran, bien en face"
 
@@ -76,7 +76,7 @@ msgstr "Garde la tête au centre"
 
 #: facelock_gtk/enroll.py:42 facelock_gtk/window.py:82
 #: facelock_gtk/window.py:165 facelock_gtk/window.py:194
-#: facelock_gtk/window.py:325 facelock_gtk/window.py:430
+#: facelock_gtk/window.py:326 facelock_gtk/window.py:431
 msgid "Add a Face"
 msgstr "Ajouter un visage"
 
@@ -88,7 +88,7 @@ msgstr "En attente d'autorisation…"
 msgid "Confirm with your password to add a face."
 msgstr "Confirme avec ton mot de passe pour ajouter un visage."
 
-#: facelock_gtk/enroll.py:73 facelock_gtk/tester.py:29
+#: facelock_gtk/enroll.py:73 facelock_gtk/tester.py:31
 #: facelock_gtk/window.py:179 facelock_gtk/window.py:195
 msgid "Test Recognition"
 msgstr "Tester la reconnaissance"
@@ -105,8 +105,8 @@ msgstr "Visage ajouté"
 msgid "Try Again"
 msgstr "Réessayer"
 
-#: facelock_gtk/enroll.py:108 facelock_gtk/settings.py:64
-#: facelock_gtk/window.py:330
+#: facelock_gtk/enroll.py:108 facelock_gtk/settings.py:72
+#: facelock_gtk/window.py:331
 msgid "Authorization denied"
 msgstr "Autorisation refusée"
 
@@ -181,30 +181,30 @@ msgstr "Autoriser les webcams classiques"
 msgid "Only used when there is no infrared camera"
 msgstr "Utilisées uniquement en l'absence de caméra infrarouge"
 
-#: facelock_gtk/settings.py:52 facelock_gtk/window.py:255
+#: facelock_gtk/settings.py:60 facelock_gtk/window.py:256
 msgid "No camera found"
 msgstr "Aucune caméra trouvée"
 
-#: facelock_gtk/settings.py:55
+#: facelock_gtk/settings.py:63
 msgid "Infrared camera — protected against photos and screens"
 msgstr "Caméra infrarouge — protégée contre les photos et les écrans"
 
-#: facelock_gtk/settings.py:57
+#: facelock_gtk/settings.py:65
 msgid "Regular webcam — weaker protection; the keyring is never unlocked"
 msgstr ""
 "Webcam classique — protection plus faible ; le trousseau n'est jamais "
 "déverrouillé"
 
-#: facelock_gtk/settings.py:60
+#: facelock_gtk/settings.py:68
 msgid "Connect an infrared camera, or allow regular webcams below"
 msgstr ""
 "Branche une caméra infrarouge, ou autorise les webcams classiques ci-dessous"
 
-#: facelock_gtk/settings.py:75
+#: facelock_gtk/settings.py:83
 msgid "Allow Regular Webcams?"
 msgstr "Autoriser les webcams classiques ?"
 
-#: facelock_gtk/settings.py:77
+#: facelock_gtk/settings.py:85
 msgid ""
 "Without an infrared camera, a good photo or video of you may be able to "
 "unlock this computer. Your keyring will never be unlocked this way."
@@ -213,12 +213,12 @@ msgstr ""
 "déverrouiller cet ordinateur. Ton trousseau ne sera jamais déverrouillé de "
 "cette façon."
 
-#: facelock_gtk/settings.py:81 facelock_gtk/window.py:381
-#: facelock_gtk/window.py:415 facelock_gtk/window.py:467
+#: facelock_gtk/settings.py:89 facelock_gtk/window.py:382
+#: facelock_gtk/window.py:416 facelock_gtk/window.py:468
 msgid "Cancel"
 msgstr "Annuler"
 
-#: facelock_gtk/settings.py:82
+#: facelock_gtk/settings.py:90
 msgid "Allow"
 msgstr "Autoriser"
 
@@ -247,107 +247,123 @@ msgid "Too little infrared reflected (screen? too far?)"
 msgstr "Trop peu d'infrarouge renvoyé (écran ? trop loin ?)"
 
 #: facelock_gtk/tester.py:20
+msgid "Looks like a photo or a screen"
+msgstr "Ressemble à une photo ou à un écran"
+
+#: facelock_gtk/tester.py:21
+msgid "Photo check models missing for the colour webcam"
+msgstr "Modèles anti-photo absents pour la webcam couleur"
+
+#: facelock_gtk/tester.py:22
 msgid "Eye reflections don't match the enrolled face"
 msgstr "Les reflets des yeux ne correspondent pas au visage enregistré"
 
-#: facelock_gtk/tester.py:22
+#: facelock_gtk/tester.py:24
 msgid "Too many failures, try again later"
 msgstr "Trop d'échecs, réessaie plus tard"
 
-#: facelock_gtk/tester.py:23
+#: facelock_gtk/tester.py:25
 msgid "Camera unavailable"
 msgstr "Caméra indisponible"
 
-#: facelock_gtk/tester.py:43
+#: facelock_gtk/tester.py:45
 msgid "Eyes"
 msgstr "Yeux"
 
-#: facelock_gtk/tester.py:43
+#: facelock_gtk/tester.py:45
 msgid "Nose"
 msgstr "Nez"
 
-#: facelock_gtk/tester.py:43
+#: facelock_gtk/tester.py:45
 msgid "Mouth corners"
 msgstr "Coins de la bouche"
 
-#: facelock_gtk/tester.py:46
+#: facelock_gtk/tester.py:48
 msgid "Live Measurements"
 msgstr "Mesures en direct"
 
-#: facelock_gtk/tester.py:54
+#: facelock_gtk/tester.py:56
 msgid "Similarity"
 msgstr "Ressemblance"
 
-#: facelock_gtk/tester.py:55
+#: facelock_gtk/tester.py:57
 #, python-brace-format
 msgid "Needs at least {t:.2f} to unlock"
 msgstr "Il faut au moins {t:.2f} pour déverrouiller"
 
-#: facelock_gtk/tester.py:61
+#: facelock_gtk/tester.py:63
 msgid "Infrared Reflection"
 msgstr "Reflet infrarouge"
 
-#: facelock_gtk/tester.py:61
+#: facelock_gtk/tester.py:63
 msgid "Light from the emitter bouncing off your face"
 msgstr "Lumière de l'émetteur renvoyée par ton visage"
 
-#: facelock_gtk/tester.py:62
+#: facelock_gtk/tester.py:65
+msgid "Live Face"
+msgstr "Visage réel"
+
+#: facelock_gtk/tester.py:65
+msgid "Chance that this is not a photo or a screen"
+msgstr "Probabilité que ce ne soit ni une photo ni un écran"
+
+#: facelock_gtk/tester.py:67
 msgid "Head Position"
 msgstr "Position de la tête"
 
-#: facelock_gtk/tester.py:62
+#: facelock_gtk/tester.py:67
 msgid "Left/right and up/down angle"
 msgstr "Angle gauche/droite et haut/bas"
 
-#: facelock_gtk/tester.py:63
+#: facelock_gtk/tester.py:68
 msgid "Eye Reflections"
 msgstr "Reflets des yeux"
 
-#: facelock_gtk/tester.py:63
+#: facelock_gtk/tester.py:68
 msgid "What the emitter's glints suggest"
 msgstr "Ce que suggèrent les reflets de l'émetteur"
 
-#: facelock_gtk/tester.py:65
+#: facelock_gtk/tester.py:70
 msgid "Test Authentication"
 msgstr "Tester l'authentification"
 
-#: facelock_gtk/tester.py:130
+#: facelock_gtk/tester.py:140
 msgid "left"
 msgstr "gauche"
 
-#: facelock_gtk/tester.py:130
+#: facelock_gtk/tester.py:140
 msgid "right"
 msgstr "droite"
 
-#: facelock_gtk/tester.py:130
+#: facelock_gtk/tester.py:140
 msgid "center"
 msgstr "centre"
 
-#: facelock_gtk/tester.py:133
+#: facelock_gtk/tester.py:143
 msgid "Glasses"
 msgstr "Lunettes"
 
-#: facelock_gtk/tester.py:133
+#: facelock_gtk/tester.py:143
 msgid "Bare eyes"
 msgstr "Yeux nus"
 
-#: facelock_gtk/tester.py:133
+#: facelock_gtk/tester.py:143
 msgid "Undecided"
 msgstr "Indéterminé"
 
-#: facelock_gtk/tester.py:139
+#: facelock_gtk/tester.py:149
 msgid "Look at the camera…"
 msgstr "Regarde la caméra…"
 
-#: facelock_gtk/tester.py:154
+#: facelock_gtk/tester.py:164
 msgid "Test failed"
 msgstr "Échec du test"
 
-#: facelock_gtk/tester.py:158
+#: facelock_gtk/tester.py:168
 msgid "Unlocked"
 msgstr "Déverrouillé"
 
-#: facelock_gtk/tester.py:160
+#: facelock_gtk/tester.py:170
 msgid "Not unlocked"
 msgstr "Non déverrouillé"
 
@@ -418,80 +434,80 @@ msgstr "Paramètres de la caméra"
 msgid "About NovID"
 msgstr "À propos de NovID"
 
-#: facelock_gtk/window.py:249
+#: facelock_gtk/window.py:250
 msgid "Infrared camera ready"
 msgstr "Caméra infrarouge prête"
 
-#: facelock_gtk/window.py:252
+#: facelock_gtk/window.py:253
 msgid "Regular webcam — weaker protection"
 msgstr "Webcam classique — protection réduite"
 
-#: facelock_gtk/window.py:264 facelock_gtk/window.py:275
+#: facelock_gtk/window.py:265 facelock_gtk/window.py:276
 msgid "Waiting…"
 msgstr "Patiente…"
 
-#: facelock_gtk/window.py:266
+#: facelock_gtk/window.py:267
 msgid "Needs an infrared camera"
 msgstr "Nécessite une caméra infrarouge"
 
-#: facelock_gtk/window.py:268
+#: facelock_gtk/window.py:269
 msgid "Turn on Login first"
 msgstr "Active d'abord la connexion"
 
-#: facelock_gtk/window.py:270
+#: facelock_gtk/window.py:271
 msgid "Unlocked at login"
 msgstr "Déverrouillé à la connexion"
 
-#: facelock_gtk/window.py:270
+#: facelock_gtk/window.py:271
 msgid "Asks for your password"
 msgstr "Demande ton mot de passe"
 
-#: facelock_gtk/window.py:275
+#: facelock_gtk/window.py:276
 msgid "On"
 msgstr "Activé"
 
-#: facelock_gtk/window.py:275
+#: facelock_gtk/window.py:276
 msgid "Off"
 msgstr "Désactivé"
 
-#: facelock_gtk/window.py:290
+#: facelock_gtk/window.py:291
 msgid "If you sometimes wear glasses, add one face with them and one without."
 msgstr "Si tu portes parfois des lunettes, ajoute un visage avec et un sans."
 
-#: facelock_gtk/window.py:301
+#: facelock_gtk/window.py:302
 msgid "Add again"
 msgstr "À refaire"
 
-#: facelock_gtk/window.py:303
+#: facelock_gtk/window.py:304
 msgid "With glasses"
 msgstr "Avec lunettes"
 
-#: facelock_gtk/window.py:305
+#: facelock_gtk/window.py:306
 #, python-brace-format
 msgid "{n} positions"
 msgstr "{n} positions"
 
-#: facelock_gtk/window.py:314
+#: facelock_gtk/window.py:315
 msgid "Rename…"
 msgstr "Renommer…"
 
-#: facelock_gtk/window.py:315
+#: facelock_gtk/window.py:316
 msgid "Remove…"
 msgstr "Supprimer…"
 
-#: facelock_gtk/window.py:319
+#: facelock_gtk/window.py:320
 msgid "Made with an older recognition model — add it again"
 msgstr "Créé avec un ancien modèle de reconnaissance — ajoute-le à nouveau"
 
-#: facelock_gtk/window.py:366
+#: facelock_gtk/window.py:367
 msgid "Keyring will ask for your password again"
 msgstr "Le trousseau demandera de nouveau ton mot de passe"
 
-#: facelock_gtk/window.py:371
+#: facelock_gtk/window.py:372
 msgid "Unlock Keyring With Your Face?"
 msgstr "Déverrouiller le trousseau avec ton visage ?"
 
-#: facelock_gtk/window.py:373
+#: facelock_gtk/window.py:374
 msgid ""
 "Your login password will be stored on this computer, encrypted by its TPM "
 "chip. It cannot be read from another computer or if the disk is removed, but "
@@ -508,31 +524,31 @@ msgstr ""
 "Si tu changes de mot de passe ou mets à jour le firmware, réactive cette "
 "option."
 
-#: facelock_gtk/window.py:379
+#: facelock_gtk/window.py:380
 msgid "Login password"
 msgstr "Mot de passe de session"
 
-#: facelock_gtk/window.py:382
+#: facelock_gtk/window.py:383
 msgid "Turn On"
 msgstr "Activer"
 
-#: facelock_gtk/window.py:402
+#: facelock_gtk/window.py:403
 msgid "Your keyring will unlock when you log in with your face"
 msgstr "Ton trousseau se déverrouillera quand tu te connectes avec ton visage"
 
-#: facelock_gtk/window.py:404
+#: facelock_gtk/window.py:405
 msgid "Wrong password"
 msgstr "Mot de passe incorrect"
 
-#: facelock_gtk/window.py:428
+#: facelock_gtk/window.py:429
 msgid "Without glasses"
 msgstr "Sans lunettes"
 
-#: facelock_gtk/window.py:428 facelock_gtk/window.py:438
+#: facelock_gtk/window.py:429 facelock_gtk/window.py:439
 msgid "My face"
 msgstr "Mon visage"
 
-#: facelock_gtk/window.py:431
+#: facelock_gtk/window.py:432
 msgid ""
 "Give it a name, for example “With glasses”. You'll then slowly turn your "
 "head while the camera captures several positions."
@@ -540,32 +556,32 @@ msgstr ""
 "Donne-lui un nom, par exemple « Avec lunettes ». Tu tourneras ensuite "
 "lentement la tête pendant que la caméra capture plusieurs positions."
 
-#: facelock_gtk/window.py:433
+#: facelock_gtk/window.py:434
 msgid "Start"
 msgstr "Commencer"
 
-#: facelock_gtk/window.py:460
+#: facelock_gtk/window.py:461
 msgid "Rename Face"
 msgstr "Renommer le visage"
 
-#: facelock_gtk/window.py:460
+#: facelock_gtk/window.py:461
 msgid "Rename"
 msgstr "Renommer"
 
-#: facelock_gtk/window.py:464
+#: facelock_gtk/window.py:465
 #, python-brace-format
 msgid "Remove “{label}”?"
 msgstr "Supprimer « {label} » ?"
 
-#: facelock_gtk/window.py:465
+#: facelock_gtk/window.py:466
 msgid "You won't be able to unlock with this face anymore."
 msgstr "Tu ne pourras plus déverrouiller avec ce visage."
 
-#: facelock_gtk/window.py:468
+#: facelock_gtk/window.py:469
 msgid "Remove"
 msgstr "Supprimer"
 
-#: facelock_gtk/window.py:480
+#: facelock_gtk/window.py:481
 #, python-brace-format
 msgid "“{label}” removed"
 msgstr "« {label} » supprimé"

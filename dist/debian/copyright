@@ -15,6 +15,10 @@ License: MIT
 Files: usr/share/facelock/models/face_recognition_sface_*.onnx
 Copyright: Yaoyao Zhong and Weihong Deng (OpenCV Zoo)
 License: Apache-2.0
+
+Files: usr/share/facelock/models/MiniFASNet*.onnx
+Copyright: Minivision AI (Silent-Face-Anti-Spoofing); ONNX export by Yakhyokhuja Valikhujaev
+License: Apache-2.0
  On Debian systems, the full text of the Apache License 2.0 can be found in
  /usr/share/common-licenses/Apache-2.0.
 

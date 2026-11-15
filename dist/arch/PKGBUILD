@@ -4,7 +4,7 @@
 pkgbase=facelock
 pkgname=('facelock' 'facelock-gtk')
 pkgver=0.1.2
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 license=('GPL-3.0-or-later')
 makedepends=('cargo' 'clang' 'gettext')
@@ -47,7 +47,9 @@ package_facelock() {
 
   install -Dm644 -t "$pkgdir/usr/share/facelock/models" \
     "$_root/models/face_detection_yunet_2026may.onnx" \
-    "$_root/models/face_recognition_sface_2021dec.onnx"
+    "$_root/models/face_recognition_sface_2021dec.onnx" \
+    "$_root/models/MiniFASNetV2.onnx" \
+    "$_root/models/MiniFASNetV1SE.onnx"
 }
 
 package_facelock-gtk() {

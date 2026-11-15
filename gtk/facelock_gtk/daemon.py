@@ -31,7 +31,7 @@ def error_text(err: GLib.Error) -> str:
 class Daemon(GObject.Object):
     __gsignals__ = {
         "frame": (GObject.SignalFlags.RUN_FIRST, None, (int, int, GLib.Bytes, object)),
-        "stats": (GObject.SignalFlags.RUN_FIRST, None, (float, float, float, float, str)),
+        "stats": (GObject.SignalFlags.RUN_FIRST, None, (float, float, float, float, float, str)),
         "enroll-calibrating": (GObject.SignalFlags.RUN_FIRST, None, (float,)),
         "enroll-step": (GObject.SignalFlags.RUN_FIRST, None, (int, int, str, str, float)),
         "enroll-progress": (GObject.SignalFlags.RUN_FIRST, None, (float, float, str)),
