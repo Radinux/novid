@@ -39,5 +39,9 @@ pub(crate) fn session(env: &Environment, path: &Path) -> Result<Session> {
         .unwrap_or_else(|e| e.recover())
         .with_intra_threads(4)
         .unwrap_or_else(|e| e.recover())
+        // Idle pool threads would otherwise busy-wait between frames: with
+        // four models that kept several cores at 100% during a preview.
+        .with_intra_op_spinning(false)
+        .unwrap_or_else(|e| e.recover())
         .commit_from_file(path)?)
 }
