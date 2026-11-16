@@ -1,12 +1,12 @@
 [package]
 name = "facelock"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-facelock-core = { version = "0.1.2", path = "../facelock-core" }
+facelock-core = { version = "0.1.3", path = "../facelock-core" }
 futures-util = "0.3.34"
 image = { version = "0.25.10", default-features = false, features = ["png"] }
 nix = { version = "0.31.3", features = ["user"] }
