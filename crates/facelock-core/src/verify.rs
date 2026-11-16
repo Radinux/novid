@@ -239,7 +239,7 @@ mod tests {
 
     #[test]
     fn borderline_frames_need_min_matches() {
-        let (n, v) = run(&VerifyConfig::default(), &[0.6, 0.9, 0.6, 0.9]);
+        let (n, v) = run(&VerifyConfig::default(), &[0.75, 0.9, 0.75, 0.9]);
         assert_eq!(n, 3);
         assert!(matches!(v, Some(Verdict::Match { .. })));
     }

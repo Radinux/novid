@@ -35,7 +35,7 @@ class TestPage(Adw.NavigationPage):
         self.active = False
 
         v = daemon.proxy.get_cached_property("Threshold") if daemon.proxy else None
-        self.threshold = v.unpack() if v else 0.5
+        self.threshold = v.unpack() if v else 0.7
 
         self.view = CameraView(ring=False, full=True)
         self.view.set_size_request(-1, 220)

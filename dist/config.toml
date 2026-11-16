@@ -1,34 +1,37 @@
-# NovID (facelock) configuration. Every key is optional; defaults are shown.
+# NovID (facelock) configuration. Every key is optional: the defaults are
+# shown commented out, so new defaults from updates still apply. Uncomment a
+# key to change it.
 
 [camera]
 # "auto" finds the IR camera (greyscale frames, strobing emitter). Or give a
 # path, preferably a stable one from /dev/v4l/by-path/.
-device = "auto"
+# device = "auto"
 # Allow a regular colour webcam when there is no IR camera. Weaker: no IR
 # liveness, only a learned photo/screen check (MiniFASNet, see
 # rgb_antispoof); the keyring is never unlocked.
-allow_rgb = false
-width = 640
-height = 360
-fps = 30
+# allow_rgb = false
+# width = 640
+# height = 360
+# fps = 30
 
 [verify]
-# Cosine similarity a frame needs to count as a match.
-threshold = 0.5
-min_matches = 3
+# Cosine similarity a frame needs to count as a match. Your own face usually
+# scores 0.85-0.95, someone else up to ~0.45.
+# threshold = 0.7
+# min_matches = 3
 # Two frames at or above this similarity are enough (about 130 ms faster);
 # borderline matches still need min_matches. 1.0 turns this off.
-fast_threshold = 0.8
-timeout_ms = 4000
+# fast_threshold = 0.8
+# timeout_ms = 4000
 # Refuse when the IR emitter does not strobe (lit/dark frame pairs).
-require_strobe = true
-min_emitter_gain = 30.0
+# require_strobe = true
+# min_emitter_gain = 30.0
 # Experimental: eye reflections must agree with the enrolled profile
 # (glasses or not). Not reliable yet, off by default.
-eyewear_check = false
+# eyewear_check = false
 # Colour webcams only: refuse faces that MiniFASNet takes for a photo or a
 # screen, i.e. whose live-face probability (0..1) is below min_real_score.
-rgb_antispoof = true
-min_real_score = 0.6
-max_failures = 5
-cooldown_s = 30
+# rgb_antispoof = true
+# min_real_score = 0.6
+# max_failures = 5
+# cooldown_s = 30

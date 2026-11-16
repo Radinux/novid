@@ -77,7 +77,7 @@ pub struct VerifyConfig {
 impl Default for VerifyConfig {
     fn default() -> Self {
         Self {
-            threshold: 0.5,
+            threshold: 0.7,
             min_matches: 3,
             fast_threshold: 0.8,
             timeout_ms: 4000,
@@ -112,5 +112,18 @@ impl Config {
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(Self::default()),
             Err(e) => Err(e).with_context(|| format!("reading {}", path.display())),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shipped_config_is_all_defaults() {
+        let shipped = concat!(env!("CARGO_MANIFEST_DIR"), "/../../dist/config.toml");
+        let c = Config::load(Path::new(shipped)).unwrap();
+        assert_eq!(c.verify.threshold, VerifyConfig::default().threshold);
+        assert!(!c.camera.allow_rgb);
     }
 }
