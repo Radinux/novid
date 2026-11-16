@@ -80,7 +80,7 @@ impl Default for VerifyConfig {
             threshold: 0.7,
             min_matches: 3,
             fast_threshold: 0.8,
-            timeout_ms: 4000,
+            timeout_ms: 5000,
             require_strobe: true,
             min_emitter_gain: 30.0,
             // Experimental: the reflection classifier is not reliable yet.

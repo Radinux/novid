@@ -22,7 +22,7 @@
 # Two frames at or above this similarity are enough (about 130 ms faster);
 # borderline matches still need min_matches. 1.0 turns this off.
 # fast_threshold = 0.8
-# timeout_ms = 4000
+# timeout_ms = 5000
 # Refuse when the IR emitter does not strobe (lit/dark frame pairs).
 # require_strobe = true
 # min_emitter_gain = 30.0

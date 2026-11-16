@@ -133,7 +133,7 @@ allow_rgb = false    # fall back to a regular webcam (weaker, see below)
 [verify]
 threshold = 0.7      # higher = stricter match
 fast_threshold = 0.8 # two frames this similar are enough (faster unlock)
-timeout_ms = 4000
+timeout_ms = 5000
 max_failures = 5     # then wait cooldown_s seconds
 cooldown_s = 30
 min_real_score = 0.6 # colour webcams: photo/screen check (MiniFASNet)
